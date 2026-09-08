@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Desafio 30 Dias de Setembro | Habit Tracker & Calendário</title>
   <meta name="description" content="Acompanhe seus 30 hábitos durante os 30 dias de setembro. Calendário interativo, checklist diário, matriz de calor, timer pomodoro, diário de bordo com capa de livro e alertas prioritários.">
-  <link rel="stylesheet" href="css/style.css?v=3.3">
+  <link rel="stylesheet" href="css/style.css?v=3.4">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="icon" type="image/png" sizes="64x64" href="icon-64.png">
   <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
@@ -154,6 +154,9 @@
         </button>
         <button class="daily-subtab-btn" data-subtab="subtab-focus">
           <span>⏱️</span> Foco <span id="subtab-focus-badge" class="notification-badge badge-empty">0m</span>
+        </button>
+        <button class="daily-subtab-btn" data-subtab="subtab-workout">
+          <span>🏋️</span> Treino <span id="subtab-workout-badge" class="notification-badge badge-empty">-</span>
         </button>
       </div>
 
@@ -417,6 +420,13 @@
         </div>
       </div>
 
+      <!-- SUB-TAB 1.6: Treino do Dia Conectado à Grade Semanal -->
+      <div id="subtab-workout" class="daily-subtab-content">
+        <div class="daily-workout-panel" id="daily-workout-panel">
+          <!-- Injected via JavaScript renderDailyWorkoutSubtab() -->
+        </div>
+      </div>
+
     </main>
 
     <!-- TAB 2: Calendário 30 Dias (Com Alertas, Leitor de Diário, Capa & Foco) -->
@@ -554,20 +564,41 @@
 
     <!-- TAB 6: Galeria de Treinos Estilo Notion -->
     <section id="tab-workout" class="tab-content-panel">
+
+      <!-- Grade Semanal (Segunda a Domingo) & Atalhos Rápidos -->
+      <div class="workout-weekly-bar-card">
+        <div class="workout-weekly-header">
+          <div class="workout-weekly-title-wrap">
+            <span class="workout-weekly-icon">📅</span>
+            <div>
+              <h3 class="workout-weekly-title">Grade Semanal de Treinos</h3>
+              <p class="workout-weekly-subtitle">Selecione o dia da semana para visualizar o treino ou ajuste sua divisão semanal padrão:</p>
+            </div>
+          </div>
+          <button type="button" class="btn-secondary" id="btn-open-weekly-schedule-modal">
+            ⚙️ Configurar Grade Semanal
+          </button>
+        </div>
+
+        <div class="workout-weekly-days-grid" id="workout-weekly-days-grid">
+          <!-- Injetado via JavaScript renderWeeklyScheduleBar() -->
+        </div>
+      </div>
+
       <!-- Notion Header & Routine Tabs -->
       <div class="notion-workout-header">
         <div class="notion-routine-tabs" id="notion-routine-tabs">
           <button type="button" class="notion-tab-btn active" data-routine="A">
-            <span class="notion-grid-icon">⊞</span> A
+            <span class="notion-grid-icon">⊞</span> A • Peito & Tríceps
           </button>
           <button type="button" class="notion-tab-btn" data-routine="B">
-            <span class="notion-grid-icon">⊞</span> B
+            <span class="notion-grid-icon">⊞</span> B • Pernas & Fisioterapia
           </button>
           <button type="button" class="notion-tab-btn" data-routine="C">
-            <span class="notion-grid-icon">⊞</span> C
+            <span class="notion-grid-icon">⊞</span> C • Costas & Bíceps
           </button>
           <button type="button" class="notion-tab-btn" data-routine="D">
-            <span class="notion-grid-icon">⊞</span> D
+            <span class="notion-grid-icon">⊞</span> D • Ombros & Core
           </button>
         </div>
 
@@ -1014,13 +1045,45 @@
     </div>
   </div>
 
+  <!-- MODAL: Configurar Grade Semanal de Treinos -->
+  <div class="modal-overlay" id="modal-weekly-schedule">
+    <div class="modal-dialog" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 class="modal-title">🗓️ Grade Semanal de Treinos</h3>
+        <button class="modal-close-btn" id="btn-close-weekly-schedule-modal">&times;</button>
+      </div>
+
+      <div class="weekly-schedule-modal-body">
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.2rem; line-height: 1.4;">
+          Defina sua programação semanal padrão. O app selecionará automaticamente o treino certo para cada dia:
+        </p>
+
+        <form id="form-weekly-schedule" class="weekly-schedule-form">
+          <div class="schedule-days-list" id="schedule-days-list">
+            <!-- Injetado via JavaScript renderWeeklyScheduleModal() -->
+          </div>
+
+          <div class="modal-footer" style="margin-top: 1.25rem; display: flex; justify-content: space-between; align-items: center; gap: 0.75rem;">
+            <button type="button" class="btn-secondary" id="btn-reset-default-schedule" style="font-size: 0.8rem;">
+              ↺ Restaurar Padrão
+            </button>
+            <div style="display: flex; gap: 0.5rem;">
+              <button type="button" class="btn-secondary" id="btn-cancel-weekly-schedule">Cancelar</button>
+              <button type="submit" class="btn-primary">💾 Salvar Grade</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Container -->
   <div class="toast-container" id="toast-container"></div>
 
   <!-- Scripts -->
-  <script src="js/workouts-data.js?v=3.3"></script>
-  <script src="js/confetti.js?v=3.3"></script>
-  <script src="js/storage.js?v=3.3"></script>
-  <script src="js/app.js?v=3.3"></script>
+  <script src="js/workouts-data.js?v=3.4"></script>
+  <script src="js/confetti.js?v=3.4"></script>
+  <script src="js/storage.js?v=3.4"></script>
+  <script src="js/app.js?v=3.4"></script>
 </body>
 </html>

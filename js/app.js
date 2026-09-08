@@ -280,6 +280,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnCloseGifModal = document.getElementById('btn-close-gif-modal');
   const btnDoneGifModal = document.getElementById('btn-done-gif-modal');
 
+  // Weight History Modal
+  const weightHistoryModal = document.getElementById('weight-history-modal');
+  const weightHistoryModalTitle = document.getElementById('weight-history-modal-title');
+  const weightHistoryModalBadge = document.getElementById('weight-history-modal-badge');
+  const weightHistoryContent = document.getElementById('weight-history-content');
+  const btnCloseWeightHistoryModal = document.getElementById('btn-close-weight-history-modal');
+  const btnCloseWeightHistoryFooter = document.getElementById('btn-close-weight-history-footer');
+
   // Cloud Sync Config
   const CLOUD_TOKEN_KEY = 'desafio30d_cloud_token_v1';
   const CLOUD_GIST_ID_KEY = 'desafio30d_gist_id_v1';
@@ -1856,6 +1864,9 @@ document.addEventListener('DOMContentLoaded', () => {
             <button type="button" class="notion-action-btn btn-reposition-ex" title="Reposicionar Imagem (arraste para ajustar)">
               📐 Reposicionar
             </button>
+            <button type="button" class="notion-action-btn btn-history-ex" title="Ver Histórico e Evolução de Cargas">
+              📈 Cargas
+            </button>
             <button type="button" class="notion-action-btn btn-edit-ex" title="Editar Exercício">
               ✏️ Editar
             </button>
@@ -1878,9 +1889,15 @@ document.addEventListener('DOMContentLoaded', () => {
               ${setsButtonsHtml}
             </div>
 
-            <div class="notion-weight-input-wrap" title="Carga utilizada">
-              <input type="number" step="0.5" class="notion-weight-input" data-exercise-id="${exercise.id}" placeholder="0" value="${lastWeight}">
-              <span class="notion-weight-unit">kg</span>
+            <div style="display: flex; align-items: center; gap: 0.35rem;">
+              <div class="notion-weight-input-wrap" title="Carga utilizada">
+                <input type="number" step="0.5" class="notion-weight-input" data-exercise-id="${exercise.id}" placeholder="0" value="${lastWeight}">
+                <span class="notion-weight-unit">kg</span>
+              </div>
+
+              <button type="button" class="notion-history-btn btn-history-ex" data-exercise-id="${exercise.id}" title="Ver Histórico e Evolução de Cargas">
+                📈
+              </button>
             </div>
           </div>
         </div>
@@ -1888,7 +1905,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Zoom no GIF ao clicar na capa ou no botão de zoom
       card.querySelector('.notion-card-cover').addEventListener('click', (e) => {
-        if (e.target.closest('.btn-edit-ex') || e.target.closest('.btn-reposition-ex') || e.target.closest('.notion-reposition-bar')) return;
+        if (e.target.closest('.btn-edit-ex') || e.target.closest('.btn-reposition-ex') || e.target.closest('.btn-history-ex') || e.target.closest('.notion-reposition-bar')) return;
         if (e.currentTarget.classList.contains('repositioning')) return;
         openWorkoutGifModal(exercise);
       });
@@ -1903,6 +1920,16 @@ document.addEventListener('DOMContentLoaded', () => {
           startRepositionMode(coverEl, imgEl, exercise, routineKey);
         });
       }
+
+      // Histórico & Evolução de Cargas
+      card.querySelectorAll('.btn-history-ex').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openWeightHistoryModal(routineKey, exercise, () => {
+            if (typeof onRefresh === 'function') onRefresh();
+          });
+        });
+      });
 
       // Editar Exercício
       const btnEdit = card.querySelector('.btn-edit-ex');
@@ -3151,6 +3178,283 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // --- MODAL DE HISTÓRICO & EVOLUÇÃO DE CARGAS (Notion Style) ---
+  function openWeightHistoryModal(routineKey, exercise, onRefresh) {
+    if (!weightHistoryModal) return;
+    if (weightHistoryModalTitle) {
+      weightHistoryModalTitle.textContent = `📈 Evolução de Carga: ${exercise.name}`;
+    }
+    if (weightHistoryModalBadge) {
+      weightHistoryModalBadge.textContent = `Treino ${routineKey} • ${exercise.sets || 4} séries × ${exercise.reps || '10-12 reps'}`;
+    }
+
+    renderWeightHistoryContent(routineKey, exercise, onRefresh);
+    weightHistoryModal.classList.add('active');
+  }
+
+  function closeWeightHistoryModal() {
+    if (weightHistoryModal) weightHistoryModal.classList.remove('active');
+  }
+
+  if (btnCloseWeightHistoryModal) btnCloseWeightHistoryModal.addEventListener('click', closeWeightHistoryModal);
+  if (btnCloseWeightHistoryFooter) btnCloseWeightHistoryFooter.addEventListener('click', closeWeightHistoryModal);
+
+  function renderWeightHistoryContent(routineKey, exercise, onRefresh) {
+    if (!weightHistoryContent) return;
+    weightHistoryContent.innerHTML = '';
+
+    const history = HabitStorage.getExerciseWeightHistory(exercise.id);
+
+    if (!history || history.length === 0) {
+      weightHistoryContent.innerHTML = `
+        <div style="text-align: center; padding: 2.5rem 1rem; background: rgba(255, 255, 255, 0.02); border-radius: var(--radius-lg); border: 1px dashed rgba(255, 255, 255, 0.1);">
+          <div style="font-size: 3rem; margin-bottom: 0.5rem;">⚖️</div>
+          <h4 style="color: #ffffff; font-size: 1.15rem; font-weight: 800; margin-bottom: 0.35rem;">Nenhum registro de carga ainda</h4>
+          <p style="font-size: 0.85rem; color: var(--text-muted); max-width: 440px; margin: 0 auto 1.5rem auto; line-height: 1.5;">
+            Digite o peso utilizado no campo de <strong>kg</strong> do card do exercício para registrar suas cargas e gerar automaticamente o gráfico de evolução!
+          </p>
+          <div class="weight-quick-add-box" style="justify-content: center;">
+            <label for="hist-quick-day">Lançar carga retroativa:</label>
+            <select id="hist-quick-day" class="form-select" style="width: auto; padding: 0.4rem 0.6rem; font-size: 0.8rem;">
+              ${Array.from({ length: 30 }, (_, i) => i + 1).map(d => `<option value="${d}" ${d === selectedDay ? 'selected' : ''}>Dia ${d.toString().padStart(2, '0')}/09</option>`).join('')}
+            </select>
+            <input type="number" step="0.5" id="hist-quick-weight" class="form-input" placeholder="Peso kg" style="width: 90px; padding: 0.4rem 0.6rem; font-size: 0.8rem;">
+            <button type="button" class="btn-primary" id="btn-hist-quick-save" style="padding: 0.4rem 0.85rem; font-size: 0.8rem;">
+              Salvar
+            </button>
+          </div>
+        </div>
+      `;
+
+      const btnSave = weightHistoryContent.querySelector('#btn-hist-quick-save');
+      if (btnSave) {
+        btnSave.addEventListener('click', () => {
+          const selDay = parseInt(weightHistoryContent.querySelector('#hist-quick-day').value, 10) || selectedDay;
+          const wVal = parseFloat(weightHistoryContent.querySelector('#hist-quick-weight').value);
+          if (!wVal || wVal <= 0) {
+            showToast('Informe um peso válido.', '⚠️');
+            return;
+          }
+          const dKey = HabitStorage.formatDateKey(CURRENT_YEAR, CURRENT_MONTH, selDay);
+          HabitStorage.setExerciseWeight(dKey, exercise.id, wVal);
+          showToast(`Carga de ${wVal}kg registrada para o dia ${selDay}!`, '💪');
+          if (typeof onRefresh === 'function') onRefresh();
+          renderWeightHistoryContent(routineKey, exercise, onRefresh);
+        });
+      }
+      return;
+    }
+
+    // Cálculos de KPIs
+    const weights = history.map(h => h.weight);
+    const maxWeight = Math.max(...weights);
+    const maxEntry = history.find(h => h.weight === maxWeight);
+    const firstWeight = history[0].weight;
+    const lastWeight = history[history.length - 1].weight;
+    const diff = lastWeight - firstWeight;
+    const diffPercent = firstWeight > 0 ? ((diff / firstWeight) * 100).toFixed(0) : 0;
+    const diffSign = diff > 0 ? `+${diff.toFixed(1)}` : diff.toFixed(1);
+
+    // KPI Grid HTML
+    const kpiHtml = `
+      <div class="weight-kpi-grid">
+        <div class="weight-kpi-card">
+          <span class="weight-kpi-label">🏆 Recorde (PR)</span>
+          <span class="weight-kpi-val">${maxWeight} <small style="font-size: 0.85rem; color: #a1a1aa;">kg</small></span>
+          <span class="weight-kpi-sub">Dia ${maxEntry.day}/09</span>
+        </div>
+        <div class="weight-kpi-card">
+          <span class="weight-kpi-label">⚡ Carga Atual</span>
+          <span class="weight-kpi-val">${lastWeight} <small style="font-size: 0.85rem; color: #a1a1aa;">kg</small></span>
+          <span class="weight-kpi-sub" style="color: #a1a1aa;">Último treino</span>
+        </div>
+        <div class="weight-kpi-card">
+          <span class="weight-kpi-label">📈 Evolução</span>
+          <span class="weight-kpi-val" style="color: ${diff >= 0 ? 'var(--accent-emerald-light)' : 'var(--accent-rose)'};">${diffSign} <small style="font-size: 0.85rem;">kg</small></span>
+          <span class="weight-kpi-sub" style="color: ${diff >= 0 ? 'var(--accent-emerald-light)' : 'var(--accent-rose)'};">${diff >= 0 ? `+${diffPercent}%` : `${diffPercent}%`}</span>
+        </div>
+        <div class="weight-kpi-card">
+          <span class="weight-kpi-label">🗓️ Sessões</span>
+          <span class="weight-kpi-val">${history.length} <small style="font-size: 0.85rem; color: #a1a1aa;">dias</small></span>
+          <span class="weight-kpi-sub" style="color: #a1a1aa;">Registrados</span>
+        </div>
+      </div>
+    `;
+
+    // SVG Line & Area Chart
+    const chartW = 540;
+    const chartH = 150;
+    const padX = 42;
+    const padYTop = 28;
+    const padYBottom = 32;
+
+    const minW = Math.max(0, Math.min(...weights) - 5);
+    const maxW = Math.max(...weights) + 5;
+    const range = (maxW - minW) || 10;
+
+    const points = history.map((item, idx) => {
+      const x = history.length === 1 
+        ? chartW / 2 
+        : padX + (idx / (history.length - 1)) * (chartW - padX * 2);
+      const y = chartH - padYBottom - ((item.weight - minW) / range) * (chartH - padYTop - padYBottom);
+      return { x, y, ...item };
+    });
+
+    let linePathD = '';
+    let areaPathD = '';
+
+    if (points.length === 1) {
+      linePathD = `M ${points[0].x - 40} ${points[0].y} L ${points[0].x + 40} ${points[0].y}`;
+      areaPathD = `M ${points[0].x - 40} ${points[0].y} L ${points[0].x + 40} ${points[0].y} L ${points[0].x + 40} ${chartH - padYBottom} L ${points[0].x - 40} ${chartH - padYBottom} Z`;
+    } else {
+      linePathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ');
+      areaPathD = `${linePathD} L ${points[points.length - 1].x.toFixed(1)} ${(chartH - padYBottom).toFixed(1)} L ${points[0].x.toFixed(1)} ${(chartH - padYBottom).toFixed(1)} Z`;
+    }
+
+    const svgElements = `
+      <svg class="weight-svg-chart" viewBox="0 0 ${chartW} ${chartH}">
+        <defs>
+          <linearGradient id="weightAreaGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#10b981" stop-opacity="0.32" />
+            <stop offset="100%" stop-color="#10b981" stop-opacity="0.0" />
+          </linearGradient>
+          <filter id="weightGlow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="3" result="glow" />
+            <feComposite in="SourceGraphic" in2="glow" operator="over" />
+          </filter>
+        </defs>
+
+        <!-- Linhas guias de fundo -->
+        <line x1="${padX}" y1="${chartH - padYBottom}" x2="${chartW - padX}" y2="${chartH - padYBottom}" stroke="rgba(255,255,255,0.08)" stroke-width="1" />
+        <line x1="${padX}" y1="${padYTop}" x2="${chartW - padX}" y2="${padYTop}" stroke="rgba(255,255,255,0.05)" stroke-dasharray="3,3" stroke-width="1" />
+
+        <!-- Area com gradiente -->
+        <path d="${areaPathD}" fill="url(#weightAreaGrad)" />
+
+        <!-- Linha da curva -->
+        <path d="${linePathD}" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" filter="url(#weightGlow)" />
+
+        <!-- Pontos e Labels -->
+        ${points.map((p) => `
+          <g class="chart-point-group">
+            <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="5.5" fill="#10b981" stroke="#ffffff" stroke-width="2" />
+            <text x="${p.x.toFixed(1)}" y="${(p.y - 10).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="800" fill="#ffffff">
+              ${p.weight}kg
+            </text>
+            <text x="${p.x.toFixed(1)}" y="${(chartH - 12).toFixed(1)}" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">
+              ${p.day.toString().padStart(2, '0')}/09
+            </text>
+          </g>
+        `).join('')}
+      </svg>
+    `;
+
+    // Lista de Sessões em ordem decrescente (mais recente primeiro)
+    const reversedHistory = [...history].reverse();
+    const listHtml = reversedHistory.map((session, revIdx) => {
+      const origIdx = history.length - 1 - revIdx;
+      let diffHtml = '';
+      if (origIdx > 0) {
+        const prevSession = history[origIdx - 1];
+        const stepDiff = session.weight - prevSession.weight;
+        if (stepDiff > 0) {
+          diffHtml = `<span class="weight-session-diff up">+${stepDiff.toFixed(1)} kg 🚀</span>`;
+        } else if (stepDiff === 0) {
+          diffHtml = `<span class="weight-session-diff same">Mantido ➡️</span>`;
+        } else {
+          diffHtml = `<span class="weight-session-diff down">${stepDiff.toFixed(1)} kg 🔻</span>`;
+        }
+      } else {
+        diffHtml = `<span class="weight-session-diff same">1º Registro 🎯</span>`;
+      }
+
+      const dateObj = new Date(session.year, session.month - 1, session.day);
+      const dayName = WEEKDAY_NAMES[dateObj.getDay()];
+
+      return `
+        <div class="weight-session-item">
+          <div class="weight-session-date-col">
+            <span class="weight-session-date">📅 ${dayName}, ${session.day.toString().padStart(2, '0')} de Setembro</span>
+            <span class="weight-session-sets">
+              ${session.setsDone.length > 0 ? `✓ ${session.setsDone.length} séries marcadas` : 'Carga registrada'}
+            </span>
+          </div>
+          <div class="weight-session-load-col">
+            <span class="weight-session-load">${session.weight} kg</span>
+            ${diffHtml}
+            <button type="button" class="weight-session-delete-btn" data-date="${session.dateKey}" title="Excluir registro deste dia">
+              🗑️
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    weightHistoryContent.innerHTML = `
+      ${kpiHtml}
+
+      <div class="weight-chart-box">
+        <div class="weight-chart-header">
+          <span>📊 Curva de Progressão de Carga</span>
+          <span style="color: var(--accent-emerald-light); font-size: 0.75rem;">Setembro 2026</span>
+        </div>
+        ${svgElements}
+      </div>
+
+      <div class="weight-timeline-title">
+        <span>📋 Histórico de Treinos & Cargas</span>
+      </div>
+
+      <div class="weight-sessions-list">
+        ${listHtml}
+      </div>
+
+      <div class="weight-quick-add-box">
+        <label for="hist-quick-day">➕ Lançar / Ajustar Carga em outro dia:</label>
+        <select id="hist-quick-day" class="form-select" style="width: auto; padding: 0.35rem 0.6rem; font-size: 0.8rem;">
+          ${Array.from({ length: 30 }, (_, i) => i + 1).map(d => `<option value="${d}" ${d === selectedDay ? 'selected' : ''}>Dia ${d.toString().padStart(2, '0')}/09</option>`).join('')}
+        </select>
+        <input type="number" step="0.5" id="hist-quick-weight" class="form-input" placeholder="0.0" style="width: 80px; padding: 0.35rem 0.6rem; font-size: 0.8rem;">
+        <span style="font-size: 0.8rem; color: #94a3b8;">kg</span>
+        <button type="button" class="btn-primary" id="btn-hist-quick-save" style="padding: 0.35rem 0.85rem; font-size: 0.8rem; margin-left: auto;">
+          💾 Salvar
+        </button>
+      </div>
+    `;
+
+    // Eventos de exclusão de registro de um dia
+    weightHistoryContent.querySelectorAll('.weight-session-delete-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const dKey = btn.dataset.date;
+        if (confirm(`Deseja remover o registro de carga da data ${dKey}?`)) {
+          HabitStorage.deleteExerciseDayWeight(dKey, exercise.id);
+          showToast('Registro de carga removido.', '🗑️');
+          if (typeof onRefresh === 'function') onRefresh();
+          renderWeightHistoryContent(routineKey, exercise, onRefresh);
+        }
+      });
+    });
+
+    // Quick add submit
+    const btnQuickSave = weightHistoryContent.querySelector('#btn-hist-quick-save');
+    if (btnQuickSave) {
+      btnQuickSave.addEventListener('click', () => {
+        const selDay = parseInt(weightHistoryContent.querySelector('#hist-quick-day').value, 10) || selectedDay;
+        const wVal = parseFloat(weightHistoryContent.querySelector('#hist-quick-weight').value);
+        if (!wVal || wVal <= 0) {
+          showToast('Informe um valor de peso válido em kg.', '⚠️');
+          return;
+        }
+        const dKey = HabitStorage.formatDateKey(CURRENT_YEAR, CURRENT_MONTH, selDay);
+        HabitStorage.setExerciseWeight(dKey, exercise.id, wVal);
+        showToast(`Carga de ${wVal}kg salva para o dia ${selDay}!`, '💪');
+        if (typeof onRefresh === 'function') onRefresh();
+        renderWeightHistoryContent(routineKey, exercise, onRefresh);
+      });
+    }
+  }
+
   function renderAllViews() {
     updateHeroSection();
     renderChecklist();
@@ -3574,6 +3878,8 @@ document.addEventListener('DOMContentLoaded', () => {
         timelineModal.classList.remove('active');
         if (workoutGifModal) workoutGifModal.classList.remove('active');
         if (exerciseModal) exerciseModal.classList.remove('active');
+        if (warmupModal) warmupModal.classList.remove('active');
+        if (weightHistoryModal) weightHistoryModal.classList.remove('active');
       }
       return;
     }

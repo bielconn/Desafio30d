@@ -2288,6 +2288,143 @@ body {
 }
 
 /* ==========================================================================
+   Seções de Treino (Aquecimento & Fortalecimento) Estilo Notion
+   ========================================================================== */
+.workout-section-block {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.workout-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.15rem;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.workout-section-title-box {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.workout-section-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.45rem;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.18), rgba(59, 130, 246, 0.15));
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+#section-exercise-block .workout-section-icon {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.18), rgba(239, 68, 68, 0.15));
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.workout-section-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 0.15rem 0;
+}
+
+.workout-section-subtitle {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.workout-section-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.workout-section-progress {
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-muted);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+}
+
+.workout-section-progress.completed {
+  background: rgba(16, 185, 129, 0.18);
+  color: var(--accent-emerald-light);
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+/* Warmup Single Check Button on Notion Card */
+.warmup-card-check-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.65rem 1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e2e8f0;
+  user-select: none;
+}
+
+.warmup-card-check-btn:hover {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.warmup-card-check-btn.checked {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.4);
+  color: var(--accent-emerald-light);
+}
+
+.warmup-check-circle {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.warmup-card-check-btn:hover .warmup-check-circle {
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.warmup-card-check-btn.checked .warmup-check-circle {
+  background: var(--accent-emerald);
+  border-color: var(--accent-emerald);
+  color: #ffffff;
+}
+
+/* ==========================================================================
    Card Retrátil de Aquecimento & Mobilidade Pré-Treino (Estilo Notion)
    ========================================================================== */
 .workout-warmup-card {

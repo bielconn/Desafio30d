@@ -98,7 +98,7 @@ body {
   border: 1px solid var(--border-color);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-sm);
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.85rem;
   position: sticky;
   top: 0.75rem;
   z-index: 50;
@@ -296,7 +296,7 @@ body {
   border-radius: var(--radius-xl);
   padding: 1.5rem;
   box-shadow: var(--shadow-sm);
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
   display: grid;
   grid-template-columns: 1.4fr 1fr;
   gap: 1.5rem;
@@ -457,9 +457,9 @@ body {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.75rem;
   border-bottom: 1px solid var(--border-color);
-  padding-bottom: 0.5rem;
+  padding-bottom: 0.85rem;
   overflow-x: auto;
 }
 
@@ -2518,7 +2518,7 @@ body {
     border-radius: var(--radius-lg);
     position: relative;
     top: 0;
-    margin-bottom: 0.85rem;
+    margin-bottom: 1.15rem;
   }
 
   .brand-wrapper {
@@ -2636,7 +2636,7 @@ body {
     padding: 1rem 0.85rem;
     gap: 1rem;
     border-radius: var(--radius-lg);
-    margin-bottom: 1rem;
+    margin-bottom: 1.35rem;
   }
 
   .date-navigator {
@@ -2698,8 +2698,8 @@ body {
   /* Daily Sub-Tabs Navigation (Scroll Touch) */
   .daily-subtabs-nav {
     gap: 0.35rem;
-    padding-bottom: 0.35rem;
-    margin-bottom: 0.85rem;
+    padding-bottom: 0.65rem;
+    margin-bottom: 1.25rem;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;

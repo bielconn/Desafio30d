@@ -14,6 +14,7 @@ const HabitStorage = (() => {
   const SETTINGS_KEY = 'desafio30d_settings_v1';
   const WORKOUTS_KEY = 'desafio30d_workouts_v1';
   const WORKOUT_ROUTINES_KEY = 'desafio30d_custom_routines_v1';
+  const WORKOUT_SCHEDULE_KEY = 'desafio30d_workout_schedule_v1';
 
   // 30 Personalized Habits from user with multi-count & Pomodoro eligibility
   const DEFAULT_HABITS = [
@@ -995,10 +996,56 @@ const HabitStorage = (() => {
     return routines[routineKey];
   }
 
+  // --- WORKOUT WEEKLY SCHEDULE (Grade Semanal de Treinos) ---
+  const DEFAULT_WORKOUT_SCHEDULE = {
+    1: 'A',     // Segunda: Treino A (Peito, Ombro & Tríceps)
+    2: 'B',     // Terça: Treino B (Pernas, Quadril & Fortalecimento)
+    3: 'REST',  // Quarta: Descanso / Recuperação Ativa
+    4: 'C',     // Quinta: Treino C (Costas & Bíceps)
+    5: 'D',     // Sexta: Treino D (Ombros, Core & Mobilidade)
+    6: 'REST',  // Sábado: Descanso
+    0: 'REST'   // Domingo: Descanso
+  };
+
+  function getWeeklyWorkoutSchedule() {
+    try {
+      const data = localStorage.getItem(WORKOUT_SCHEDULE_KEY);
+      if (data) {
+        const parsed = JSON.parse(data);
+        if (parsed && typeof parsed === 'object') {
+          return { ...DEFAULT_WORKOUT_SCHEDULE, ...parsed };
+        }
+      }
+    } catch (e) {
+      console.error('Error reading weekly workout schedule', e);
+    }
+    return { ...DEFAULT_WORKOUT_SCHEDULE };
+  }
+
+  function saveWeeklyWorkoutSchedule(schedule) {
+    try {
+      localStorage.setItem(WORKOUT_SCHEDULE_KEY, JSON.stringify(schedule));
+    } catch (e) {
+      console.error('Error saving weekly workout schedule', e);
+    }
+  }
+
+  function resetWeeklyWorkoutSchedule() {
+    saveWeeklyWorkoutSchedule(DEFAULT_WORKOUT_SCHEDULE);
+    return { ...DEFAULT_WORKOUT_SCHEDULE };
+  }
+
+  function getRoutineForDay(year, month, day) {
+    const dateObj = new Date(year, month - 1, day);
+    const weekday = dateObj.getDay(); // 0 (Dom) a 6 (Sab)
+    const schedule = getWeeklyWorkoutSchedule();
+    return schedule[weekday] !== undefined ? schedule[weekday] : 'REST';
+  }
+
   // --- BACKUP & RESTORE ---
   function exportBackupJSON() {
     const exportData = {
-      version: '3.6',
+      version: '3.7',
       exportedAt: new Date().toISOString(),
       appName: 'Desafio 30 Dias de Setembro',
       habits: getHabits(),
@@ -1010,7 +1057,8 @@ const HabitStorage = (() => {
       activeBook: getActiveBook(),
       activeBible: getActiveBible(),
       workouts: getAllWorkoutsData(),
-      customWorkouts: getWorkoutRoutines()
+      customWorkouts: getWorkoutRoutines(),
+      weeklyWorkoutSchedule: getWeeklyWorkoutSchedule()
     };
     return JSON.stringify(exportData, null, 2);
   }
@@ -1048,6 +1096,9 @@ const HabitStorage = (() => {
       if (parsed.customWorkouts && typeof parsed.customWorkouts === 'object') {
         saveWorkoutRoutines(parsed.customWorkouts);
       }
+      if (parsed.weeklyWorkoutSchedule && typeof parsed.weeklyWorkoutSchedule === 'object') {
+        saveWeeklyWorkoutSchedule(parsed.weeklyWorkoutSchedule);
+      }
       return { success: true, message: 'Dados restaurados com sucesso!' };
     } catch (e) {
       console.error('Import error', e);
@@ -1070,9 +1121,11 @@ const HabitStorage = (() => {
     localStorage.removeItem(SETTINGS_KEY);
     localStorage.removeItem(WORKOUTS_KEY);
     localStorage.removeItem(WORKOUT_ROUTINES_KEY);
+    localStorage.removeItem(WORKOUT_SCHEDULE_KEY);
     saveHabits(DEFAULT_HABITS);
     saveAllAlerts(DEFAULT_ALERTS);
     resetWorkoutRoutinesToDefault();
+    resetWeeklyWorkoutSchedule();
   }
 
   return {
@@ -1133,6 +1186,11 @@ const HabitStorage = (() => {
     resetWorkoutRoutinesToDefault,
     saveExercise,
     deleteExercise,
+    getWeeklyWorkoutSchedule,
+    saveWeeklyWorkoutSchedule,
+    resetWeeklyWorkoutSchedule,
+    getRoutineForDay,
+    DEFAULT_WORKOUT_SCHEDULE,
     // Backup
     exportBackupJSON,
     importBackupJSON,

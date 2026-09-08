@@ -30,7 +30,7 @@
         <div class="brand-icon">🎯</div>
         <div class="brand-info">
           <h1>Desafio 30 Dias</h1>
-          <span class="brand-badge">📅 Setembro 2026 • 30 Hábitos, Foco & Alertas</span>
+          <span class="brand-badge">📅 Setembro 2026<span class="brand-badge-detail"> • 30 Hábitos, Foco & Alertas</span></span>
         </div>
       </div>
 
@@ -230,7 +230,7 @@
               <span>➕</span> Novo Alerta / Compromisso
             </div>
             
-            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+            <div class="form-grid-2col">
               <div>
                 <label class="form-label" for="alert-input-title">O que você precisa lembrar?</label>
                 <input type="text" id="alert-input-title" class="form-input" placeholder="Ex: Consulta Fisioterapia, Cancelar plano Gemini, etc." required autocomplete="off">
@@ -241,7 +241,7 @@
               </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
+            <div class="form-grid-3col">
               <div>
                 <label class="form-label" for="alert-input-category">Tipo de Alerta</label>
                 <select id="alert-input-category" class="form-select">
@@ -678,7 +678,7 @@
           </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem;">
+        <div class="form-grid-3col">
           <div class="form-group">
             <label class="form-label" for="form-habit-target-count">Quantas Vezes ao Dia?</label>
             <select id="form-habit-target-count" class="form-select">

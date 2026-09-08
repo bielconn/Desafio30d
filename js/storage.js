@@ -12,6 +12,7 @@ const HabitStorage = (() => {
   const ACTIVE_BOOK_KEY = 'desafio30d_active_book_v1';
   const ACTIVE_BIBLE_KEY = 'desafio30d_active_bible_v1';
   const SETTINGS_KEY = 'desafio30d_settings_v1';
+  const WORKOUTS_KEY = 'desafio30d_workouts_v1';
 
   // 30 Personalized Habits from user with multi-count & Pomodoro eligibility
   const DEFAULT_HABITS = [
@@ -833,10 +834,87 @@ const HabitStorage = (() => {
     };
   }
 
+  // --- WORKOUTS (Treinos & Ficha com GIFs) ---
+  function getAllWorkoutsData() {
+    try {
+      const data = localStorage.getItem(WORKOUTS_KEY);
+      return data ? JSON.parse(data) : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveAllWorkoutsData(data) {
+    try {
+      localStorage.setItem(WORKOUTS_KEY, JSON.stringify(data));
+    } catch (e) {
+      console.error('Error saving workouts data', e);
+    }
+  }
+
+  function getDayWorkoutLog(dateKey) {
+    const all = getAllWorkoutsData();
+    return all[dateKey] || { exercises: {}, notes: '', completed: false };
+  }
+
+  function saveDayWorkoutLog(dateKey, logData) {
+    const all = getAllWorkoutsData();
+    all[dateKey] = {
+      ...(all[dateKey] || {}),
+      ...logData
+    };
+    saveAllWorkoutsData(all);
+    return all[dateKey];
+  }
+
+  function toggleWorkoutSet(dateKey, exerciseId, setIndex) {
+    const all = getAllWorkoutsData();
+    if (!all[dateKey]) all[dateKey] = { exercises: {}, notes: '', completed: false };
+    if (!all[dateKey].exercises[exerciseId]) {
+      all[dateKey].exercises[exerciseId] = { setsDone: [], weight: getLastUsedWeight(exerciseId) || '' };
+    }
+
+    const exData = all[dateKey].exercises[exerciseId];
+    if (!Array.isArray(exData.setsDone)) exData.setsDone = [];
+
+    const idx = exData.setsDone.indexOf(setIndex);
+    if (idx >= 0) {
+      exData.setsDone.splice(idx, 1);
+    } else {
+      exData.setsDone.push(setIndex);
+      exData.setsDone.sort((a, b) => a - b);
+    }
+
+    saveAllWorkoutsData(all);
+    return exData.setsDone;
+  }
+
+  function setExerciseWeight(dateKey, exerciseId, weight) {
+    const all = getAllWorkoutsData();
+    if (!all[dateKey]) all[dateKey] = { exercises: {}, notes: '', completed: false };
+    if (!all[dateKey].exercises[exerciseId]) {
+      all[dateKey].exercises[exerciseId] = { setsDone: [], weight: '' };
+    }
+    all[dateKey].exercises[exerciseId].weight = weight;
+    saveAllWorkoutsData(all);
+
+    try {
+      localStorage.setItem(`desafio30d_last_weight_${exerciseId}`, weight);
+    } catch (e) {}
+  }
+
+  function getLastUsedWeight(exerciseId) {
+    try {
+      return localStorage.getItem(`desafio30d_last_weight_${exerciseId}`) || '';
+    } catch (e) {
+      return '';
+    }
+  }
+
   // --- BACKUP & RESTORE ---
   function exportBackupJSON() {
     const exportData = {
-      version: '3.5',
+      version: '3.6',
       exportedAt: new Date().toISOString(),
       appName: 'Desafio 30 Dias de Setembro',
       habits: getHabits(),
@@ -846,7 +924,8 @@ const HabitStorage = (() => {
       focus: getAllFocusData(),
       alerts: getAllAlerts(),
       activeBook: getActiveBook(),
-      activeBible: getActiveBible()
+      activeBible: getActiveBible(),
+      workouts: getAllWorkoutsData()
     };
     return JSON.stringify(exportData, null, 2);
   }
@@ -878,6 +957,9 @@ const HabitStorage = (() => {
       if (parsed.activeBible && typeof parsed.activeBible === 'object') {
         saveActiveBible(parsed.activeBible);
       }
+      if (parsed.workouts && typeof parsed.workouts === 'object') {
+        saveAllWorkoutsData(parsed.workouts);
+      }
       return { success: true, message: 'Dados restaurados com sucesso!' };
     } catch (e) {
       console.error('Import error', e);
@@ -898,6 +980,7 @@ const HabitStorage = (() => {
     localStorage.removeItem(ACTIVE_BOOK_KEY);
     localStorage.removeItem(ACTIVE_BIBLE_KEY);
     localStorage.removeItem(SETTINGS_KEY);
+    localStorage.removeItem(WORKOUTS_KEY);
     saveHabits(DEFAULT_HABITS);
     saveAllAlerts(DEFAULT_ALERTS);
   }
@@ -947,6 +1030,14 @@ const HabitStorage = (() => {
     saveDayJournal,
     hasDayActivity,
     getAllJournals,
+    // Workouts (Treinos & Ficha com GIFs)
+    getAllWorkoutsData,
+    saveAllWorkoutsData,
+    getDayWorkoutLog,
+    saveDayWorkoutLog,
+    toggleWorkoutSet,
+    setExerciseWeight,
+    getLastUsedWeight,
     // Backup
     exportBackupJSON,
     importBackupJSON,

@@ -7,6 +7,48 @@ const WorkoutData = {
       subtitle: 'Peito, Ombro & Tríceps',
       badge: 'Superior • Empurrar',
       color: '#3b82f6',
+      warmup: [
+        {
+          id: 'wa1',
+          order: 1,
+          name: 'Cardio Leve',
+          tags: ['Aquecimento', 'Geral'],
+          reps: '3 a 5 min',
+          notes: '3 a 5 min de caminhada rápida ou esteira para elevar a temperatura corporal e circulação.',
+          gifUrl: 'https://images.unsplash.com/photo-1538805060514-97d9cc17730c?w=600&auto=format&fit=crop',
+          gifFallback: 'https://images.unsplash.com/photo-1538805060514-97d9cc17730c?w=600&auto=format&fit=crop'
+        },
+        {
+          id: 'wa2',
+          order: 2,
+          name: 'Manguito Rotador (Rotação Externa)',
+          tags: ['Mobilidade', 'Manguito', 'Prevenção'],
+          reps: '2 séries × 15 reps',
+          notes: '2 séries de 15 reps com elástico ou polia leve. Mantenha o cotovelo colado ao corpo para blindar o ombro contra lesões no supino.',
+          gifUrl: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/External_Rotation/0.jpg',
+          gifFallback: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&auto=format&fit=crop'
+        },
+        {
+          id: 'wa3',
+          order: 3,
+          name: 'Alongamento Dinâmico de Peitoral',
+          tags: ['Mobilidade', 'Peitoral'],
+          reps: '12 repetições',
+          notes: '12 repetições abrindo os braços em cruz com amplitude progressiva e sem dar trancos.',
+          gifUrl: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Chest_And_Front_Of_Shoulder_Stretch/0.jpg',
+          gifFallback: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&auto=format&fit=crop'
+        },
+        {
+          id: 'wa4',
+          order: 4,
+          name: 'Série de Reconhecimento no Supino',
+          tags: ['Aquecimento', 'Ativação'],
+          reps: '12 a 15 reps (Barra Vazia)',
+          notes: '1 série de 12 a 15 reps apenas com a barra vazia para ajustar a trajetória motora e encaixar as escápulas antes das cargas.',
+          gifUrl: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Bench_Press_-_Medium_Grip/0.jpg',
+          gifFallback: 'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=600&auto=format&fit=crop'
+        }
+      ],
       exercises: [
         {
           id: 'supino_inclinado',
@@ -88,6 +130,58 @@ const WorkoutData = {
       subtitle: 'Pernas, Quadril & Fortalecimento',
       badge: 'Inferior • Reabilitação',
       color: '#10b981',
+      warmup: [
+        {
+          id: 'wb1',
+          order: 1,
+          name: 'Cardio Leve (Bike ou Esteira)',
+          tags: ['Aquecimento', 'Circulação'],
+          reps: '5 minutos',
+          notes: '5 min em ritmo moderado para lubrificar as cartilagens dos joelhos e quadris.',
+          gifUrl: 'https://images.unsplash.com/photo-1538805060514-97d9cc17730c?w=600&auto=format&fit=crop',
+          gifFallback: 'https://images.unsplash.com/photo-1538805060514-97d9cc17730c?w=600&auto=format&fit=crop'
+        },
+        {
+          id: 'wb2',
+          order: 2,
+          name: 'Mobilidade de Quadril 90/90 no Solo',
+          tags: ['Mobilidade', 'Quadril', 'Pélvis'],
+          reps: '10 rotações cada lado',
+          notes: '10 rotações lentas de cada lado. Destrava a cápsula articular do quadril e protege a pelve e virilha.',
+          gifUrl: 'https://i.makeagif.com/media/7-17-2021/zNHLoV.gif',
+          gifFallback: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&auto=format&fit=crop'
+        },
+        {
+          id: 'wb3',
+          order: 3,
+          name: 'Alongamento Dinâmico de Adutores & Virilha',
+          tags: ['Mobilidade', 'Virilha', 'Prevenção'],
+          reps: '10 a 12 oscilações suaves',
+          notes: '10 a 12 oscilações suaves em base aberta no solo. Previne pinçamento no púbis e dores na virilha pós-fisioterapia.',
+          gifUrl: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Thigh_Adductor/0.jpg',
+          gifFallback: 'https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=600&auto=format&fit=crop'
+        },
+        {
+          id: 'wb4',
+          order: 4,
+          name: 'Ponte de Glúteo no Solo (Ativação)',
+          tags: ['Ativação', 'Glúteo', 'Estabilidade'],
+          reps: '15 a 20 reps (Pausa 2s)',
+          notes: '15 a 20 reps segurando 2 segundos no topo. "Acorda" os glúteos para estabilizar o agachamento e o hack, tirando a pressão dos joelhos.',
+          gifUrl: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Glute_Bridge/0.jpg',
+          gifFallback: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=600&auto=format&fit=crop'
+        },
+        {
+          id: 'wb5',
+          order: 5,
+          name: 'Mobilidade de Tornozelo na Parede',
+          tags: ['Mobilidade', 'Tornozelo', 'Joelho'],
+          reps: '10 reps por perna',
+          notes: '10 repetições por perna sem levantar o calcanhar do chão. Garante amplitude profunda no agachamento sem sobrecarregar a patela.',
+          gifUrl: 'https://i.makeagif.com/media/4-22-2017/41sRtF.gif',
+          gifFallback: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&auto=format&fit=crop'
+        }
+      ],
       exercises: [
         {
           id: 'agachamento_livre',
@@ -181,6 +275,48 @@ const WorkoutData = {
       subtitle: 'Costas, Bíceps & Abdômen',
       badge: 'Superior • Puxar',
       color: '#8b5cf6',
+      warmup: [
+        {
+          id: 'wc1',
+          order: 1,
+          name: 'Cardio Leve',
+          tags: ['Aquecimento', 'Geral'],
+          reps: '3 a 5 min',
+          notes: '3 a 5 min de aquecimento geral para elevar o fluxo sanguíneo.',
+          gifUrl: 'https://images.unsplash.com/photo-1538805060514-97d9cc17730c?w=600&auto=format&fit=crop',
+          gifFallback: 'https://images.unsplash.com/photo-1538805060514-97d9cc17730c?w=600&auto=format&fit=crop'
+        },
+        {
+          id: 'wc2',
+          order: 2,
+          name: 'Mobilidade Cat-Cow no Solo',
+          tags: ['Mobilidade', 'Coluna', 'Lombar'],
+          reps: '10 ciclos lentos',
+          notes: '10 ciclos lentos de flexão e extensão da coluna para mobilizar as vértebras e descompressão discal.',
+          gifUrl: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cat_Stretch/0.jpg',
+          gifFallback: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=600&auto=format&fit=crop'
+        },
+        {
+          id: 'wc3',
+          order: 3,
+          name: 'Alongamento Dinâmico de Posteriores',
+          tags: ['Mobilidade', 'Posterior'],
+          reps: '10 repetições alternadas',
+          notes: '10 repetições de afundo com rotação de tronco para soltar isquiotibiais e glúteos.',
+          gifUrl: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/World_Greatest_Stretch/0.jpg',
+          gifFallback: 'https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=600&auto=format&fit=crop'
+        },
+        {
+          id: 'wc4',
+          order: 4,
+          name: 'Prancha Isométrica Ativa',
+          tags: ['Ativação', 'Core'],
+          reps: '30 a 45 segundos',
+          notes: '30 a 45 segundos travando glúteo e abdômen para estabilizar a lombar antes dos puxadores e remadas.',
+          gifUrl: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Plank/0.jpg',
+          gifFallback: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&auto=format&fit=crop'
+        }
+      ],
       exercises: [
         {
           id: 'puxada_frente',
@@ -262,6 +398,48 @@ const WorkoutData = {
       subtitle: 'Ombros, Core & Cardio / Mobilidade',
       badge: 'Funcional • Estabilização',
       color: '#f59e0b',
+      warmup: [
+        {
+          id: 'wd1',
+          order: 1,
+          name: 'Cardio Leve (Bike / Caminhada)',
+          tags: ['Cardio', 'Aquecimento'],
+          reps: '5 minutos',
+          notes: '5 min de bike ou caminhada contínua moderada.',
+          gifUrl: 'https://images.unsplash.com/photo-1538805060514-97d9cc17730c?w=600&auto=format&fit=crop',
+          gifFallback: 'https://images.unsplash.com/photo-1538805060514-97d9cc17730c?w=600&auto=format&fit=crop'
+        },
+        {
+          id: 'wd2',
+          order: 2,
+          name: 'Dislocação de Ombros com Bastão / Elástico',
+          tags: ['Mobilidade', 'Ombros'],
+          reps: '12 repetições',
+          notes: '12 repetições em amplitude segura para soltar a articulação gleno-umeral.',
+          gifUrl: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Shoulder_Stretch/0.jpg',
+          gifFallback: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&auto=format&fit=crop'
+        },
+        {
+          id: 'wd3',
+          order: 3,
+          name: 'Ponte Unilateral para Glúteo',
+          tags: ['Ativação', 'Glúteo', 'Pelve'],
+          reps: '10 reps cada perna',
+          notes: '10 reps cada perna para ativação neuromuscular de pelve e estabilização de quadril.',
+          gifUrl: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Single_Leg_Glute_Bridge/0.jpg',
+          gifFallback: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=600&auto=format&fit=crop'
+        },
+        {
+          id: 'wd4',
+          order: 4,
+          name: 'Perdigueiro (Bird-Dog) no Solo',
+          tags: ['Core', 'Estabilidade', 'Postura'],
+          reps: '10 reps alternadas',
+          notes: '10 reps alternadas com pausa de 2s no topo para controle postural e core.',
+          gifUrl: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bird_Dog/0.jpg',
+          gifFallback: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&auto=format&fit=crop'
+        }
+      ],
       exercises: [
         {
           id: 'desenvolvimento_arnold',

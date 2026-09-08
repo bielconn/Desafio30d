@@ -2050,15 +2050,26 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="warmup-steps-grid">
           ${protocol.steps.map((step) => {
             const done = warmupChecks.includes(step.id);
+            const thumbImg = step.gifUrl || step.gifFallback || '';
             return `
               <div class="warmup-step-item ${done ? 'is-done' : ''}" data-step-id="${step.id}" tabIndex="0" role="checkbox" aria-checked="${done}">
-                <div class="warmup-checkbox-circle">${done ? '✓' : ''}</div>
+                <div class="warmup-checkbox-circle" title="Marcar como concluído">${done ? '✓' : ''}</div>
+                ${thumbImg ? `
+                  <div class="warmup-thumb-preview" data-step-id="${step.id}" title="Clique para ver o GIF de demonstração">
+                    <img src="${thumbImg}" alt="${step.title}" loading="lazy" onerror="if(this.src!=='${step.gifFallback||''}')this.src='${step.gifFallback||''}'">
+                    <span class="warmup-thumb-badge">GIF</span>
+                  </div>
+                ` : ''}
                 <div class="warmup-step-content">
                   <div class="warmup-step-header">
                     <span class="warmup-step-icon">${step.icon || '⚡'}</span>
                     <span>${step.title}</span>
+                    ${step.reps ? `<span class="warmup-step-reps-badge">${step.reps}</span>` : ''}
                   </div>
                   <div class="warmup-step-desc">${step.desc}</div>
+                  <button type="button" class="warmup-btn-demo" data-step-id="${step.id}" title="Ver GIF em tamanho ampliado e instruções anatômicas">
+                    🎬 Ver GIF & Como Fazer
+                  </button>
                 </div>
               </div>
             `;
@@ -2090,7 +2101,32 @@ document.addEventListener('DOMContentLoaded', () => {
       } catch (err) {}
     });
 
-    // Clique em cada item da checklist de aquecimento
+    // Clique na thumbnail ou no botão "Ver GIF & Como Fazer" abre o modal com o GIF e dicas biomecânicas
+    card.querySelectorAll('.warmup-thumb-preview, .warmup-btn-demo').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const stepId = btn.dataset.stepId;
+        const step = protocol.steps.find(s => s.id === stepId);
+        if (step && typeof openWorkoutGifModal === 'function') {
+          openWorkoutGifModal({
+            name: `${step.icon || ''} ${step.title}`,
+            tags: ['Aquecimento Dinâmico', `Treino ${routineKey}`, protocol.title],
+            gifUrl: step.gifUrl || step.gifFallback,
+            gifFallback: step.gifFallback,
+            notes: `
+              <strong>🎯 Meta:</strong> ${step.reps || '10 a 12 oscilações'}<br><br>
+              <strong>💡 Passo a Passo da Execução:</strong><br>${step.howTo || step.desc}<br><br>
+              <strong>🛡️ Prevenção & Reabilitação:</strong><br>${step.desc}
+            `,
+            sets: 1,
+            reps: step.reps || '10 a 12 reps',
+            restSeconds: 0
+          });
+        }
+      });
+    });
+
+    // Clique em cada item da checklist de aquecimento (checkbox)
     const stepItems = card.querySelectorAll('.warmup-step-item');
     stepItems.forEach(item => {
       const handleToggle = (e) => {

@@ -2552,6 +2552,80 @@ body {
   margin-top: 0.25rem;
 }
 
+.warmup-thumb-preview {
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #0f1015;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  flex-shrink: 0;
+  position: relative;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.warmup-thumb-preview:hover {
+  transform: scale(1.06);
+  border-color: rgba(59, 130, 246, 0.5);
+}
+
+.warmup-thumb-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.warmup-thumb-badge {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(4px);
+  color: #fbbf24;
+  font-size: 0.62rem;
+  border-radius: 3px;
+  padding: 1px 3px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.warmup-step-reps-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fbbf24;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: 4px;
+  padding: 0.1rem 0.4rem;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.warmup-btn-demo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.73rem;
+  font-weight: 700;
+  color: #60a5fa;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  border-radius: var(--radius-md);
+  padding: 0.22rem 0.55rem;
+  margin-top: 0.45rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.warmup-btn-demo:hover {
+  background: rgba(59, 130, 246, 0.22);
+  color: #93c5fd;
+  border-color: rgba(59, 130, 246, 0.45);
+}
+
 .warmup-footer-actions {
   display: flex;
   align-items: center;

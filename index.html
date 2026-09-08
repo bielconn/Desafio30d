@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Desafio 30 Dias de Setembro | Habit Tracker & Calendário</title>
   <meta name="description" content="Acompanhe seus 30 hábitos durante os 30 dias de setembro. Calendário interativo, checklist diário, matriz de calor, timer pomodoro, diário de bordo com capa de livro e alertas prioritários.">
-  <link rel="stylesheet" href="css/style.css?v=3.4">
+  <link rel="stylesheet" href="css/style.css?v=3.5">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="icon" type="image/png" sizes="64x64" href="icon-64.png">
   <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
@@ -146,6 +146,9 @@
         <button class="daily-subtab-btn" data-subtab="subtab-tasks">
           <span>📋</span> Tarefas Avulsas <span id="subtab-tasks-badge" class="notification-badge badge-empty">0</span>
         </button>
+        <button class="daily-subtab-btn" data-subtab="subtab-workout">
+          <span>🏋️</span> Treino do Dia <span id="subtab-workout-badge" class="notification-badge badge-empty">-</span>
+        </button>
         <button class="daily-subtab-btn" data-subtab="subtab-alerts">
           <span>🚨</span> Alertas <span id="subtab-alerts-badge" class="notification-badge badge-empty">0</span>
         </button>
@@ -154,9 +157,6 @@
         </button>
         <button class="daily-subtab-btn" data-subtab="subtab-focus">
           <span>⏱️</span> Foco <span id="subtab-focus-badge" class="notification-badge badge-empty">0m</span>
-        </button>
-        <button class="daily-subtab-btn" data-subtab="subtab-workout">
-          <span>🏋️</span> Treino <span id="subtab-workout-badge" class="notification-badge badge-empty">-</span>
         </button>
       </div>
 
@@ -1081,9 +1081,9 @@
   <div class="toast-container" id="toast-container"></div>
 
   <!-- Scripts -->
-  <script src="js/workouts-data.js?v=3.4"></script>
-  <script src="js/confetti.js?v=3.4"></script>
-  <script src="js/storage.js?v=3.4"></script>
-  <script src="js/app.js?v=3.4"></script>
+  <script src="js/workouts-data.js?v=3.5"></script>
+  <script src="js/confetti.js?v=3.5"></script>
+  <script src="js/storage.js?v=3.5"></script>
+  <script src="js/app.js?v=3.5"></script>
 </body>
 </html>

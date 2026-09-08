@@ -189,6 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Cloud Sync DOM
   const btnSaveCloud = document.getElementById('btn-save-cloud');
   const btnLoadCloud = document.getElementById('btn-load-cloud');
+  const btnResetCloudToken = document.getElementById('btn-reset-cloud-token');
   const cloudSyncStatus = document.getElementById('cloud-sync-status');
   const cloudSyncInfo = document.getElementById('cloud-sync-info');
 
@@ -2066,6 +2067,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (btnSaveCloud) btnSaveCloud.addEventListener('click', cloudSave);
   if (btnLoadCloud) btnLoadCloud.addEventListener('click', cloudLoad);
+  if (btnResetCloudToken) btnResetCloudToken.addEventListener('click', () => {
+    if (confirm('Redefinir token e ID da nuvem? Voce precisara inserir o token novamente na proxima sincronizacao.')) {
+      localStorage.removeItem(CLOUD_TOKEN_KEY);
+      localStorage.removeItem(CLOUD_GIST_ID_KEY);
+      updateCloudStatus();
+      showToast('Token redefinido! Clique em Salvar na Nuvem para configurar novamente.', 'ok');
+    }
+  });
 
   // Keyboard navigation shortcuts
   window.addEventListener('keydown', (e) => {

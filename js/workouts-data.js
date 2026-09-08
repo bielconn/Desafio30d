@@ -313,5 +313,62 @@ const WorkoutData = {
         }
       ]
     }
+  },
+
+  // Protocolos de Aquecimento Dinâmico & Mobilidade Pré-Treino
+  warmupProtocols: {
+    A: {
+      routineId: 'A',
+      title: 'Mobilidade Escapular, Manguito & Aquecimento Superior',
+      subtitle: 'Ombros, Peitoral & Aquecimento Articular',
+      duration: '5 a 7 min',
+      color: '#3b82f6',
+      steps: [
+        { id: 'wa1', icon: '🚶', title: 'Cardio Leve', desc: '3 a 5 min de caminhada rápida ou esteira para elevar a temperatura corporal e circulação.' },
+        { id: 'wa2', icon: '🔄', title: 'Manguito Rotador (Rotação Externa)', desc: '2 séries de 15 reps com elástico ou polia leve. Essencial para blindar o ombro contra lesões no supino.' },
+        { id: 'wa3', icon: '🙆', title: 'Alongamento Dinâmico de Peitoral', desc: '12 repetições abrindo os braços em cruz com amplitude progressiva e sem dar trancos.' },
+        { id: 'wa4', icon: '⚡', title: 'Série de Reconhecimento no Supino', desc: '1 série de 12 a 15 reps apenas com a barra vazia para ajustar a trajetória motora antes das cargas.' }
+      ]
+    },
+    B: {
+      routineId: 'B',
+      title: 'Mobilidade de Quadril 90/90, Adutores & Ativação de Pernas',
+      subtitle: 'Proteção Pélvica, Virilha & Ativação Glútea (Prevenção & Reabilitação)',
+      duration: '6 a 8 min',
+      color: '#10b981',
+      steps: [
+        { id: 'wb1', icon: '🚴', title: 'Cardio Leve (Bike ou Esteira)', desc: '5 min em ritmo moderado para lubrificar as cartilagens dos joelhos e quadris.' },
+        { id: 'wb2', icon: '🦵', title: 'Mobilidade de Quadril 90/90 no Solo', desc: '10 rotações lentas de cada lado. Destrava a cápsula articular do quadril e protege a pelve e virilha.' },
+        { id: 'wb3', icon: '🧘', title: 'Alongamento Dinâmico de Adutores & Flexores', desc: '10 a 12 oscilações suaves em base aberta. Previne pinçamento no púbis e dores na virilha.' },
+        { id: 'wb4', icon: '⚡', title: 'Ponte de Glúteo no Solo (Ativação)', desc: '15 a 20 reps segurando 2 segundos no topo. "Acorda" os glúteos para estabilizar o agachamento e o hack.' },
+        { id: 'wb5', icon: '🦶', title: 'Mobilidade de Tornozelo na Parede', desc: '10 repetições por perna sem levantar o calcanhar. Garante amplitude profunda e sem dor no joelho.' }
+      ]
+    },
+    C: {
+      routineId: 'C',
+      title: 'Mobilidade Torácica, Descompressão de Coluna & Core',
+      subtitle: 'Dorsais, Coluna & Isquiotibiais',
+      duration: '5 a 7 min',
+      color: '#a855f7',
+      steps: [
+        { id: 'wc1', icon: '🚶', title: 'Cardio Leve', desc: '3 a 5 min de aquecimento geral para elevar o fluxo sanguíneo.' },
+        { id: 'wc2', icon: '🐈', title: 'Mobilidade Cat-Cow no Solo', desc: '10 ciclos lentos de flexão e extensão da coluna para mobilizar as vértebras.' },
+        { id: 'wc3', icon: '🤸', title: 'Alongamento Dinâmico de Posteriores', desc: '10 repetições de afundo com rotação de tronco para soltar isquiotibiais e glúteos.' },
+        { id: 'wc4', icon: '⚡', title: 'Prancha Isométrica Ativa', desc: '30 a 45 segundos travando glúteo e abdômen para estabilizar a lombar antes dos puxadores.' }
+      ]
+    },
+    D: {
+      routineId: 'D',
+      title: 'Mobilidade de Ombros, Estabilidade Pélvica & Core',
+      subtitle: 'Cintura Escapular, Glúteos & Mobilidade',
+      duration: '5 a 7 min',
+      color: '#f59e0b',
+      steps: [
+        { id: 'wd1', icon: '🚴', title: 'Cardio Leve', desc: '5 min de bike ou caminhada contínua moderada.' },
+        { id: 'wd2', icon: '🔄', title: 'Dislocação de Ombros com Bastão ou Elástico', desc: '12 repetições em amplitude segura para soltar a articulação gleno-umeral.' },
+        { id: 'wd3', icon: '🧘', title: 'Ponte Unilateral para Glúteo', desc: '10 reps cada perna para ativação neuromuscular de pelve e estabilização de quadril.' },
+        { id: 'wd4', icon: '⚡', title: 'Perdigueiro (Bird-Dog) no Solo', desc: '10 reps alternadas com pausa de 2s no topo para controle postural e core.' }
+      ]
+    }
   }
 };

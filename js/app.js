@@ -1815,11 +1815,14 @@ document.addEventListener('DOMContentLoaded', () => {
       card.innerHTML = `
         <div class="notion-card-cover" data-exercise-id="${exercise.id}">
           <span class="notion-order-tag">#${orderNum}</span>
-          <img src="${gifSrc}" alt="${exercise.name}" loading="lazy" onerror="this.src='${exercise.gifFallback || 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&auto=format&fit=crop'}'">
+          <img src="${gifSrc}" alt="${exercise.name}" style="object-position: center ${exercise.imgPosY !== undefined ? exercise.imgPosY : 50}%;" loading="lazy" onerror="this.src='${exercise.gifFallback || 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&auto=format&fit=crop'}'">
           
           <div class="notion-cover-actions">
             <button type="button" class="notion-action-btn btn-zoom-gif" title="Ampliar GIF e Instruções">
               🔍 Zoom
+            </button>
+            <button type="button" class="notion-action-btn btn-reposition-ex" title="Reposicionar Imagem (arraste para ajustar)">
+              📐 Reposicionar
             </button>
             <button type="button" class="notion-action-btn btn-edit-ex" title="Editar Exercício">
               ✏️ Editar
@@ -1853,9 +1856,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Zoom no GIF ao clicar na capa ou no botão de zoom
       card.querySelector('.notion-card-cover').addEventListener('click', (e) => {
-        if (e.target.closest('.btn-edit-ex')) return;
+        if (e.target.closest('.btn-edit-ex') || e.target.closest('.btn-reposition-ex') || e.target.closest('.notion-reposition-bar')) return;
+        if (e.currentTarget.classList.contains('repositioning')) return;
         openWorkoutGifModal(exercise);
       });
+
+      // Reposicionar Imagem (arraste estilo Notion)
+      const btnReposition = card.querySelector('.btn-reposition-ex');
+      if (btnReposition) {
+        btnReposition.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const coverEl = card.querySelector('.notion-card-cover');
+          const imgEl = coverEl.querySelector('img');
+          startRepositionMode(coverEl, imgEl, exercise, routineKey);
+        });
+      }
 
       // Editar Exercício
       const btnEdit = card.querySelector('.btn-edit-ex');
@@ -1892,6 +1907,97 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       container.appendChild(card);
+    });
+  }
+
+  function startRepositionMode(coverEl, imgEl, exercise, routineKey) {
+    if (coverEl.classList.contains('repositioning')) return;
+    coverEl.classList.add('repositioning');
+
+    let initialPosY = exercise.imgPosY !== undefined ? exercise.imgPosY : 50;
+    let currentPosY = initialPosY;
+    let isDragging = false;
+    let startClientY = 0;
+
+    // Barra superior e mensagem central estilo Notion
+    const barEl = document.createElement('div');
+    barEl.className = 'notion-reposition-bar';
+    barEl.innerHTML = `
+      <button type="button" class="reposition-btn-save">Salvar posição</button>
+      <button type="button" class="reposition-btn-cancel">Cancelar</button>
+      <span class="reposition-drag-icon">↕</span>
+    `;
+
+    const hintEl = document.createElement('div');
+    hintEl.className = 'notion-reposition-hint';
+    hintEl.textContent = 'Arraste a imagem para reposicionar';
+
+    coverEl.appendChild(barEl);
+    coverEl.appendChild(hintEl);
+
+    const onPointerDown = (e) => {
+      if (e.target.closest('.notion-reposition-bar')) return;
+      isDragging = true;
+      startClientY = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
+      coverEl.classList.add('dragging');
+      if (e.preventDefault && e.type !== 'touchstart') e.preventDefault();
+    };
+
+    const onPointerMove = (e) => {
+      if (!isDragging) return;
+      const clientY = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
+      const deltaY = clientY - startClientY;
+      const rect = coverEl.getBoundingClientRect();
+      const height = rect.height || 200;
+
+      // Arrastar para baixo move a imagem para baixo revelando o topo (posY menor)
+      let newPosY = initialPosY - (deltaY / height) * 100;
+      if (newPosY < 0) newPosY = 0;
+      if (newPosY > 100) newPosY = 100;
+      currentPosY = Math.round(newPosY);
+      imgEl.style.objectPosition = `center ${currentPosY}%`;
+      if (e.cancelable) e.preventDefault();
+    };
+
+    const onPointerUp = () => {
+      if (!isDragging) return;
+      isDragging = false;
+      initialPosY = currentPosY;
+      coverEl.classList.remove('dragging');
+    };
+
+    coverEl.addEventListener('mousedown', onPointerDown);
+    window.addEventListener('mousemove', onPointerMove);
+    window.addEventListener('mouseup', onPointerUp);
+
+    coverEl.addEventListener('touchstart', onPointerDown, { passive: false });
+    window.addEventListener('touchmove', onPointerMove, { passive: false });
+    window.addEventListener('touchend', onPointerUp);
+
+    const cleanUp = () => {
+      coverEl.classList.remove('repositioning', 'dragging');
+      barEl.remove();
+      hintEl.remove();
+      coverEl.removeEventListener('mousedown', onPointerDown);
+      window.removeEventListener('mousemove', onPointerMove);
+      window.removeEventListener('mouseup', onPointerUp);
+      coverEl.removeEventListener('touchstart', onPointerDown);
+      window.removeEventListener('touchmove', onPointerMove);
+      window.removeEventListener('touchend', onPointerUp);
+    };
+
+    barEl.querySelector('.reposition-btn-save').addEventListener('click', (e) => {
+      e.stopPropagation();
+      exercise.imgPosY = currentPosY;
+      HabitStorage.saveExercise(routineKey, exercise);
+      cleanUp();
+      showToast('Posição da imagem salva com sucesso!', '📐');
+    });
+
+    barEl.querySelector('.reposition-btn-cancel').addEventListener('click', (e) => {
+      e.stopPropagation();
+      imgEl.style.objectPosition = `center ${exercise.imgPosY !== undefined ? exercise.imgPosY : 50}%`;
+      cleanUp();
     });
   }
 

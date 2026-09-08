@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Desafio 30 Dias de Setembro | Habit Tracker & Calendário</title>
   <meta name="description" content="Acompanhe seus 30 hábitos durante os 30 dias de setembro. Calendário interativo, checklist diário, matriz de calor, timer pomodoro, diário de bordo com capa de livro e alertas prioritários.">
-  <link rel="stylesheet" href="css/style.css?v=2.9">
+  <link rel="stylesheet" href="css/style.css?v=3.0">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="icon" type="image/png" sizes="64x64" href="icon-64.png">
   <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
@@ -548,78 +548,62 @@
       </div>
     </section>
 
-    <!-- TAB 6: Treinos da Semana & Ficha com GIFs -->
+    <!-- TAB 6: Galeria de Treinos Estilo Notion -->
     <section id="tab-workout" class="tab-content-panel">
-      <!-- Weekday Selector -->
-      <div class="workout-days-nav-wrapper">
-        <div class="workout-days-nav" id="workout-days-nav">
-          <button class="workout-day-pill" data-day="1">
-            <span class="pill-day-abbr">SEG</span>
-            <span class="pill-day-label">Perna A</span>
+      <!-- Notion Header & Routine Tabs -->
+      <div class="notion-workout-header">
+        <div class="notion-routine-tabs" id="notion-routine-tabs">
+          <button type="button" class="notion-tab-btn active" data-routine="A">
+            <span class="notion-grid-icon">⊞</span> A
           </button>
-          <button class="workout-day-pill" data-day="2">
-            <span class="pill-day-abbr">TER</span>
-            <span class="pill-day-label">Superior A</span>
+          <button type="button" class="notion-tab-btn" data-routine="B">
+            <span class="notion-grid-icon">⊞</span> B
           </button>
-          <button class="workout-day-pill" data-day="3">
-            <span class="pill-day-abbr">QUA</span>
-            <span class="pill-day-label">Descanso Ativo</span>
+          <button type="button" class="notion-tab-btn" data-routine="C">
+            <span class="notion-grid-icon">⊞</span> C
           </button>
-          <button class="workout-day-pill" data-day="4">
-            <span class="pill-day-abbr">QUI</span>
-            <span class="pill-day-label">Perna B</span>
+          <button type="button" class="notion-tab-btn" data-routine="D">
+            <span class="notion-grid-icon">⊞</span> D
           </button>
-          <button class="workout-day-pill" data-day="5">
-            <span class="pill-day-abbr">SEX</span>
-            <span class="pill-day-label">Superior B</span>
+        </div>
+
+        <div class="notion-workout-actions">
+          <button type="button" class="btn-secondary" id="btn-reset-workout-routines" title="Restaurar treinos padrão do Notion">
+            ↺ Restaurar Padrão
           </button>
-          <button class="workout-day-pill" data-day="6">
-            <span class="pill-day-abbr">SÁB</span>
-            <span class="pill-day-label">Core/Cardio</span>
-          </button>
-          <button class="workout-day-pill" data-day="0">
-            <span class="pill-day-abbr">DOM</span>
-            <span class="pill-day-label">Descanso</span>
+          <button type="button" class="btn-primary" id="btn-add-exercise">
+            + Novo Exercício
           </button>
         </div>
       </div>
 
-      <!-- Workout Routine Banner Card -->
-      <div class="workout-hero-card" id="workout-hero-card">
-        <div class="workout-hero-header">
-          <div>
-            <div class="workout-badge" id="workout-badge">Foco: Fortalecimento & Estabilização</div>
-            <h2 class="workout-title" id="workout-title">Perna A • Quadríceps, Adutores & Glúteo</h2>
-            <p class="workout-desc" id="workout-desc">Treino prioritário para fortalecimento e reabilitação pós-fisioterapia.</p>
-          </div>
-          <div class="workout-progress-pill" id="workout-progress-pill">
-            <span id="workout-progress-text">0/5 exercícios</span>
-          </div>
+      <!-- Routine Info & Rest Timer Bar -->
+      <div class="notion-workout-subbar">
+        <div class="notion-routine-meta">
+          <h2 class="notion-routine-title" id="notion-routine-title">Treino A • Peito, Ombro & Tríceps</h2>
+          <span class="notion-routine-badge" id="notion-routine-badge">Superior • Empurrar</span>
+          <span class="notion-routine-progress" id="notion-routine-progress">0/6 concluídos</span>
         </div>
 
-        <!-- Rest Interval Timer Bar -->
-        <div class="workout-rest-bar">
-          <div class="rest-timer-label">
-            <span>⏱️ Descanso entre séries:</span>
-            <span class="rest-timer-digits" id="workout-rest-display">00:00</span>
+        <!-- Compact Rest Timer -->
+        <div class="notion-rest-timer-box">
+          <div class="rest-timer-indicator">
+            <span>⏱️ Descanso:</span>
+            <strong id="workout-rest-display">00:00</strong>
           </div>
-          <div class="rest-timer-actions">
-            <button type="button" class="rest-preset-btn" data-sec="45">45s</button>
-            <button type="button" class="rest-preset-btn active" data-sec="60">60s</button>
-            <button type="button" class="rest-preset-btn" data-sec="90">90s</button>
-            <button type="button" class="rest-preset-btn" data-sec="120">2m</button>
-            <button type="button" class="btn-primary" id="btn-start-rest" style="font-size: 0.75rem; padding: 0.25rem 0.65rem;">
-              ▶ Iniciar Descanso
-            </button>
-            <button type="button" class="btn-secondary" id="btn-stop-rest" style="font-size: 0.75rem; padding: 0.25rem 0.5rem; display: none;">
-              ⏹️ Parar
-            </button>
+          <div class="rest-timer-pills">
+            <button type="button" class="rest-pill" data-sec="45">45s</button>
+            <button type="button" class="rest-pill active" data-sec="60">60s</button>
+            <button type="button" class="rest-pill" data-sec="90">90s</button>
+            <button type="button" class="rest-pill" data-sec="120">2m</button>
           </div>
+          <button type="button" class="btn-primary btn-rest-control" id="btn-start-rest">▶ Descansar</button>
+          <button type="button" class="btn-secondary btn-rest-control" id="btn-stop-rest" style="display: none;">⏹️ Parar</button>
         </div>
       </div>
 
-      <!-- Exercise Cards Container -->
-      <div class="workout-exercises-list" id="workout-exercises-list">
+      <!-- Notion Gallery Grid -->
+      <div class="notion-gallery-grid" id="notion-workout-gallery">
         <!-- Injected via JavaScript -->
       </div>
     </section>
@@ -847,6 +831,115 @@
     </div>
   </div>
 
+  <!-- MODAL: Adicionar / Editar Exercício do Treino (Estilo Meus Hábitos) -->
+  <div class="modal-overlay" id="exercise-modal">
+    <div class="modal-dialog" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="exercise-modal-title">💪 Configurar Exercício</h3>
+        <button class="modal-close-btn" id="btn-close-exercise-modal">&times;</button>
+      </div>
+
+      <form id="exercise-form">
+        <input type="hidden" id="form-exercise-id">
+        
+        <div class="form-group">
+          <label class="form-label" for="form-exercise-name">Nome do Exercício *</label>
+          <input type="text" id="form-exercise-name" class="form-input" placeholder="Ex: Agachamento Hack 45°, Supino..." required>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div class="form-group">
+            <label class="form-label" for="form-exercise-routine">Rotina / Ficha</label>
+            <select id="form-exercise-routine" class="form-select">
+              <option value="A">Treino A (Peito / Ombro / Tríceps)</option>
+              <option value="B">Treino B (Pernas / Fortalecimento)</option>
+              <option value="C">Treino C (Costas / Bíceps / Abdômen)</option>
+              <option value="D">Treino D (Ombros / Core / Cardio)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="form-exercise-sets">Número de Séries</label>
+            <input type="number" id="form-exercise-sets" class="form-input" min="1" max="10" value="4">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div class="form-group">
+            <label class="form-label" for="form-exercise-reps">Repetições</label>
+            <input type="text" id="form-exercise-reps" class="form-input" placeholder="Ex: 10 a 12, 15, até a falha" value="10 a 12">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="form-exercise-rest">Descanso Padrão</label>
+            <select id="form-exercise-rest" class="form-select">
+              <option value="45">45 segundos</option>
+              <option value="60" selected>60 segundos</option>
+              <option value="75">75 segundos</option>
+              <option value="90">90 segundos</option>
+              <option value="120">2 minutos</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="form-exercise-tags">Tags de Fase / Destaque</label>
+          <input type="text" id="form-exercise-tags" class="form-input" placeholder="Ex: Aquecimento, Fortalecimento, Reabilitação (separadas por vírgula)">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="form-exercise-gif">URL do GIF ou Imagem do Movimento</label>
+          <div style="display: flex; gap: 0.5rem;">
+            <input type="url" id="form-exercise-gif" class="form-input" placeholder="https://exemplo.com/exercicio.gif ou .jpg">
+          </div>
+          <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.3rem;">
+            Cole o link direto do GIF/imagem. Deixe em branco se quiser usar uma imagem ilustrativa automática.
+          </p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="form-exercise-notes">Dicas Biomecânicas & Instruções de Postura</label>
+          <textarea id="form-exercise-notes" class="form-input" rows="3" placeholder="Ex: Cadência 3s na descida, contrair glúteo no topo, manter escápulas travadas..."></textarea>
+        </div>
+
+        <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+          <button type="button" class="btn-secondary" id="btn-delete-exercise" style="color: var(--accent-rose); border-color: rgba(244,63,94,0.3); display: none;">
+            🗑️ Excluir
+          </button>
+          <div style="display: flex; gap: 0.5rem; margin-left: auto;">
+            <button type="button" class="btn-secondary" id="btn-cancel-exercise-modal">Cancelar</button>
+            <button type="submit" class="btn-primary" id="btn-save-exercise">Salvar Exercício</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Visualização Ampliada do GIF com Biomecânica -->
+  <div class="modal-overlay" id="workout-gif-modal">
+    <div class="modal-dialog" style="max-width: 580px; text-align: center;">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title" id="gif-modal-title">Exercício</h3>
+          <span class="badge-status" id="gif-modal-muscle" style="font-size: 0.75rem;">Músculo Alvo</span>
+        </div>
+        <button class="modal-close-btn" id="btn-close-gif-modal">&times;</button>
+      </div>
+
+      <div class="gif-modal-media-box">
+        <img src="" alt="Execução do Exercício" id="gif-modal-image" class="gif-modal-img">
+      </div>
+
+      <div class="gif-modal-notes-box" id="gif-modal-notes">
+        <!-- Injected via JavaScript -->
+      </div>
+
+      <div class="modal-footer" style="justify-content: flex-end; margin-top: 1rem;">
+        <button type="button" class="btn-primary" id="btn-done-gif-modal">Entendi, Bora Treinar!</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: Backup & Restauração -->
   <div class="modal-overlay" id="backup-modal">
     <div class="modal-dialog">
@@ -921,9 +1014,9 @@
   <div class="toast-container" id="toast-container"></div>
 
   <!-- Scripts -->
-  <script src="js/workouts-data.js?v=2.9"></script>
-  <script src="js/confetti.js?v=2.9"></script>
-  <script src="js/storage.js?v=2.9"></script>
-  <script src="js/app.js?v=2.9"></script>
+  <script src="js/workouts-data.js?v=3.0"></script>
+  <script src="js/confetti.js?v=3.0"></script>
+  <script src="js/storage.js?v=3.0"></script>
+  <script src="js/app.js?v=3.0"></script>
 </body>
 </html>

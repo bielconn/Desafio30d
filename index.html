@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Desafio 30 Dias de Setembro | Habit Tracker & Calendário</title>
   <meta name="description" content="Acompanhe seus 30 hábitos durante os 30 dias de setembro. Calendário interativo, checklist diário, matriz de calor, timer pomodoro, diário de bordo com capa de livro e alertas prioritários.">
-  <link rel="stylesheet" href="css/style.css?v=3.9">
+  <link rel="stylesheet" href="css/style.css?v=4.0">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="icon" type="image/png" sizes="64x64" href="icon-64.png">
   <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
@@ -637,12 +637,43 @@
         </div>
       </div>
 
-      <!-- Notion Warmup & Mobility Protocol Card -->
-      <div id="notion-workout-warmup-container"></div>
+      <!-- Seção 1: Aquecimento & Mobilidade (Cards com GIF e Check) -->
+      <div class="workout-section-block" id="section-warmup-block">
+        <div class="workout-section-header">
+          <div class="workout-section-title-box">
+            <span class="workout-section-icon">🧘</span>
+            <div>
+              <h3 class="workout-section-title">Aquecimento Dinâmico & Mobilidade</h3>
+              <p class="workout-section-subtitle">Preparação articular, ativação de glúteos e prevenção de lesões</p>
+            </div>
+          </div>
+          <div class="workout-section-actions">
+            <span class="workout-section-progress" id="notion-warmup-progress">0/5 concluídos</span>
+            <button type="button" class="btn-secondary btn-sm" id="btn-add-warmup">+ Adicionar Mobilidade</button>
+          </div>
+        </div>
+        <div class="notion-gallery-grid" id="notion-warmup-gallery">
+          <!-- Injected via JavaScript -->
+        </div>
+      </div>
 
-      <!-- Notion Gallery Grid -->
-      <div class="notion-gallery-grid" id="notion-workout-gallery">
-        <!-- Injected via JavaScript -->
+      <!-- Seção 2: Fortalecimento & Cargas (Cards com GIF, Séries e Cargas) -->
+      <div class="workout-section-block" id="section-exercise-block" style="margin-top: 2.25rem;">
+        <div class="workout-section-header">
+          <div class="workout-section-title-box">
+            <span class="workout-section-icon">🏋️</span>
+            <div>
+              <h3 class="workout-section-title">Ficha de Fortalecimento & Cargas</h3>
+              <p class="workout-section-subtitle">Séries pesadas, repetições e anotação de cargas em kg</p>
+            </div>
+          </div>
+          <div class="workout-section-actions">
+            <button type="button" class="btn-primary btn-sm" id="btn-add-exercise">+ Adicionar Exercício</button>
+          </div>
+        </div>
+        <div class="notion-gallery-grid" id="notion-workout-gallery">
+          <!-- Injected via JavaScript -->
+        </div>
       </div>
     </section>
 
@@ -953,6 +984,72 @@
     </div>
   </div>
 
+  <!-- MODAL: Adicionar / Editar Aquecimento e Mobilidade (Com escolha de GIF) -->
+  <div class="modal-overlay" id="warmup-modal">
+    <div class="modal-dialog" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="warmup-modal-title">🧘 Configurar Aquecimento / Mobilidade</h3>
+        <button class="modal-close-btn" id="btn-close-warmup-modal">&times;</button>
+      </div>
+
+      <form id="warmup-form">
+        <input type="hidden" id="form-warmup-id">
+        
+        <div class="form-group">
+          <label class="form-label" for="form-warmup-name">Nome do Movimento / Exercício *</label>
+          <input type="text" id="form-warmup-name" class="form-input" placeholder="Ex: Mobilidade de Tornozelo na Parede, Quadril 90/90..." required>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div class="form-group">
+            <label class="form-label" for="form-warmup-routine">Rotina / Treino</label>
+            <select id="form-warmup-routine" class="form-select">
+              <option value="A">Treino A (Peito / Ombro / Tríceps)</option>
+              <option value="B">Treino B (Pernas / Fortalecimento)</option>
+              <option value="C">Treino C (Costas / Bíceps / Abdômen)</option>
+              <option value="D">Treino D (Ombros / Core / Cardio)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="form-warmup-reps">Repetições ou Tempo *</label>
+            <input type="text" id="form-warmup-reps" class="form-input" placeholder="Ex: 10 reps por perna, 5 min, 15-20 reps" value="10 reps cada lado" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="form-warmup-tags">Tags de Foco</label>
+          <input type="text" id="form-warmup-tags" class="form-input" placeholder="Ex: Mobilidade, Tornozelo, Joelho, Prevenção (separadas por vírgula)">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="form-warmup-gif">URL do GIF ou Imagem do Movimento</label>
+          <div style="display: flex; gap: 0.5rem;">
+            <input type="url" id="form-warmup-gif" class="form-input" placeholder="https://exemplo.com/mobilidade.gif ou .jpg">
+          </div>
+          <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.3rem;">
+            Cole o link direto de qualquer GIF animado ou imagem para exibir no card.
+          </p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="form-warmup-notes">Instruções de Postura & Benefício Clínico</label>
+          <textarea id="form-warmup-notes" class="form-input" rows="3" placeholder="Ex: Manter o calcanhar 100% no chão, não dar trancos, respirar ritmadamente..."></textarea>
+        </div>
+
+        <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+          <button type="button" class="btn-secondary" id="btn-delete-warmup" style="color: var(--accent-rose); border-color: rgba(244,63,94,0.3); display: none;">
+            🗑️ Excluir
+          </button>
+          <div style="display: flex; gap: 0.5rem; margin-left: auto;">
+            <button type="button" class="btn-secondary" id="btn-cancel-warmup-modal">Cancelar</button>
+            <button type="submit" class="btn-primary" id="btn-save-warmup">Salvar Mobilidade</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- MODAL: Visualização Ampliada do GIF com Biomecânica -->
   <div class="modal-overlay" id="workout-gif-modal">
     <div class="modal-dialog" style="max-width: 580px; text-align: center;">
@@ -1084,9 +1181,9 @@
   <div class="toast-container" id="toast-container"></div>
 
   <!-- Scripts -->
-  <script src="js/workouts-data.js?v=3.9"></script>
-  <script src="js/confetti.js?v=3.9"></script>
-  <script src="js/storage.js?v=3.9"></script>
-  <script src="js/app.js?v=3.9"></script>
+  <script src="js/workouts-data.js?v=4.0"></script>
+  <script src="js/confetti.js?v=4.0"></script>
+  <script src="js/storage.js?v=4.0"></script>
+  <script src="js/app.js?v=4.0"></script>
 </body>
 </html>

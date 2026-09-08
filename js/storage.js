@@ -13,6 +13,7 @@ const HabitStorage = (() => {
   const ACTIVE_BIBLE_KEY = 'desafio30d_active_bible_v1';
   const SETTINGS_KEY = 'desafio30d_settings_v1';
   const WORKOUTS_KEY = 'desafio30d_workouts_v1';
+  const WORKOUT_ROUTINES_KEY = 'desafio30d_custom_routines_v1';
 
   // 30 Personalized Habits from user with multi-count & Pomodoro eligibility
   const DEFAULT_HABITS = [
@@ -911,6 +912,89 @@ const HabitStorage = (() => {
     }
   }
 
+  // --- WORKOUT ROUTINES (Customização de Exercícios estilo Notion) ---
+  function getWorkoutRoutines() {
+    try {
+      const data = localStorage.getItem(WORKOUT_ROUTINES_KEY);
+      if (data) {
+        const parsed = JSON.parse(data);
+        if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) {
+          return parsed;
+        }
+      }
+    } catch (e) {
+      console.error('Error reading custom routines', e);
+    }
+    if (typeof WorkoutData !== 'undefined' && WorkoutData.defaultRoutines) {
+      return JSON.parse(JSON.stringify(WorkoutData.defaultRoutines));
+    }
+    return {};
+  }
+
+  function saveWorkoutRoutines(routines) {
+    try {
+      localStorage.setItem(WORKOUT_ROUTINES_KEY, JSON.stringify(routines));
+    } catch (e) {
+      console.error('Error saving custom routines', e);
+    }
+  }
+
+  function resetWorkoutRoutinesToDefault() {
+    if (typeof WorkoutData !== 'undefined' && WorkoutData.defaultRoutines) {
+      const def = JSON.parse(JSON.stringify(WorkoutData.defaultRoutines));
+      saveWorkoutRoutines(def);
+      return def;
+    }
+    return {};
+  }
+
+  function saveExercise(routineKey, exerciseData) {
+    const routines = getWorkoutRoutines();
+    if (!routines[routineKey]) {
+      routines[routineKey] = {
+        id: routineKey,
+        name: `Treino ${routineKey}`,
+        subtitle: 'Personalizado',
+        badge: 'Rotina',
+        color: '#3b82f6',
+        exercises: []
+      };
+    }
+    if (!Array.isArray(routines[routineKey].exercises)) {
+      routines[routineKey].exercises = [];
+    }
+
+    const exList = routines[routineKey].exercises;
+    if (exerciseData.id) {
+      const idx = exList.findIndex(e => e.id === exerciseData.id);
+      if (idx >= 0) {
+        exList[idx] = { ...exList[idx], ...exerciseData };
+      } else {
+        exList.push(exerciseData);
+      }
+    } else {
+      const newEx = {
+        ...exerciseData,
+        id: 'ex_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+        order: exList.length + 1
+      };
+      exList.push(newEx);
+    }
+
+    saveWorkoutRoutines(routines);
+    return routines[routineKey];
+  }
+
+  function deleteExercise(routineKey, exerciseId) {
+    const routines = getWorkoutRoutines();
+    if (routines[routineKey] && Array.isArray(routines[routineKey].exercises)) {
+      routines[routineKey].exercises = routines[routineKey].exercises.filter(e => e.id !== exerciseId);
+      routines[routineKey].exercises.forEach((ex, i) => { ex.order = i + 1; });
+      saveWorkoutRoutines(routines);
+    }
+    return routines[routineKey];
+  }
+
   // --- BACKUP & RESTORE ---
   function exportBackupJSON() {
     const exportData = {
@@ -925,7 +1009,8 @@ const HabitStorage = (() => {
       alerts: getAllAlerts(),
       activeBook: getActiveBook(),
       activeBible: getActiveBible(),
-      workouts: getAllWorkoutsData()
+      workouts: getAllWorkoutsData(),
+      customWorkouts: getWorkoutRoutines()
     };
     return JSON.stringify(exportData, null, 2);
   }
@@ -960,6 +1045,9 @@ const HabitStorage = (() => {
       if (parsed.workouts && typeof parsed.workouts === 'object') {
         saveAllWorkoutsData(parsed.workouts);
       }
+      if (parsed.customWorkouts && typeof parsed.customWorkouts === 'object') {
+        saveWorkoutRoutines(parsed.customWorkouts);
+      }
       return { success: true, message: 'Dados restaurados com sucesso!' };
     } catch (e) {
       console.error('Import error', e);
@@ -981,8 +1069,10 @@ const HabitStorage = (() => {
     localStorage.removeItem(ACTIVE_BIBLE_KEY);
     localStorage.removeItem(SETTINGS_KEY);
     localStorage.removeItem(WORKOUTS_KEY);
+    localStorage.removeItem(WORKOUT_ROUTINES_KEY);
     saveHabits(DEFAULT_HABITS);
     saveAllAlerts(DEFAULT_ALERTS);
+    resetWorkoutRoutinesToDefault();
   }
 
   return {
@@ -1038,6 +1128,11 @@ const HabitStorage = (() => {
     toggleWorkoutSet,
     setExerciseWeight,
     getLastUsedWeight,
+    getWorkoutRoutines,
+    saveWorkoutRoutines,
+    resetWorkoutRoutinesToDefault,
+    saveExercise,
+    deleteExercise,
     // Backup
     exportBackupJSON,
     importBackupJSON,

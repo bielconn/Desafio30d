@@ -202,8 +202,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const notionRoutineTitle = document.getElementById('notion-routine-title');
   const notionRoutineBadge = document.getElementById('notion-routine-badge');
   const notionRoutineProgress = document.getElementById('notion-routine-progress');
-  const notionWorkoutWarmupContainer = document.getElementById('notion-workout-warmup-container');
+  const notionWarmupProgress = document.getElementById('notion-warmup-progress');
+  const notionWarmupGallery = document.getElementById('notion-warmup-gallery');
   const notionWorkoutGallery = document.getElementById('notion-workout-gallery');
+  const btnAddWarmup = document.getElementById('btn-add-warmup');
   const btnAddExercise = document.getElementById('btn-add-exercise');
   const btnResetWorkoutRoutines = document.getElementById('btn-reset-workout-routines');
   const workoutRestDisplay = document.getElementById('workout-rest-display');
@@ -239,6 +241,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const formExerciseGif = document.getElementById('form-exercise-gif');
   const formExerciseNotes = document.getElementById('form-exercise-notes');
   const btnDeleteExercise = document.getElementById('btn-delete-exercise');
+
+  // Warmup Form Modal
+  const warmupModal = document.getElementById('warmup-modal');
+  const warmupModalTitle = document.getElementById('warmup-modal-title');
+  const btnCloseWarmupModal = document.getElementById('btn-close-warmup-modal');
+  const btnCancelWarmupModal = document.getElementById('btn-cancel-warmup-modal');
+  const warmupForm = document.getElementById('warmup-form');
+  const formWarmupId = document.getElementById('form-warmup-id');
+  const formWarmupName = document.getElementById('form-warmup-name');
+  const formWarmupRoutine = document.getElementById('form-warmup-routine');
+  const formWarmupReps = document.getElementById('form-warmup-reps');
+  const formWarmupTags = document.getElementById('form-warmup-tags');
+  const formWarmupGif = document.getElementById('form-warmup-gif');
+  const formWarmupNotes = document.getElementById('form-warmup-notes');
+  const btnDeleteWarmup = document.getElementById('btn-delete-warmup');
 
   // GIF Fullscreen Modal
   const workoutGifModal = document.getElementById('workout-gif-modal');
@@ -2002,193 +2019,345 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- CARD RETRÁTIL: Aquecimento Dinâmico & Mobilidade Pré-Treino ---
-  function createWarmupCardElement(routineKey, dateKey, onUpdate) {
-    if (typeof WorkoutData === 'undefined' || !WorkoutData.warmupProtocols) return null;
-    const protocol = WorkoutData.warmupProtocols[routineKey];
-    if (!protocol || !Array.isArray(protocol.steps) || protocol.steps.length === 0) return null;
+  // --- GALERIA DE CARDS: Aquecimento Dinâmico & Mobilidade (Estilo Fortalecimento com GIFs e Check Único) ---
+  function renderWarmupCardsTo(container, routineKey, dateKey, warmupList, dayLog, onRefresh) {
+    if (!container) return;
+    container.innerHTML = '';
+
+    if (!Array.isArray(warmupList) || warmupList.length === 0) {
+      container.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 2.5rem 1.5rem; background: var(--bg-card); border-radius: var(--radius-xl); border: 1px dashed var(--border-color);">
+          <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🧘</div>
+          <h4 style="font-size: 1.1rem; font-weight: 800; color: #ffffff; margin-bottom: 0.35rem;">Nenhum exercício de aquecimento cadastrado</h4>
+          <p style="color: var(--text-muted); font-size: 0.85rem; max-width: 440px; margin: 0 auto 1rem auto;">
+            Adicione exercícios de mobilidade, ativação e alongamento dinâmico para preparar o corpo antes das cargas pesadas!
+          </p>
+          <button type="button" class="btn-secondary" onclick="document.getElementById('btn-add-warmup').click()">
+            + Adicionar Primeiro Aquecimento
+          </button>
+        </div>
+      `;
+      return;
+    }
 
     const warmupChecks = HabitStorage.getWorkoutWarmupChecks(dateKey);
-    const totalSteps = protocol.steps.length;
-    const completedCount = protocol.steps.filter(s => warmupChecks.includes(s.id)).length;
-    const isAllCompleted = completedCount === totalSteps;
 
-    // Persistência do estado recolhido/expandido por rotina
-    const collapseKey = `desafio30d_warmup_collapsed_${routineKey}`;
-    const isCollapsed = localStorage.getItem(collapseKey) === 'true';
+    warmupList.forEach((item, index) => {
+      const isDone = warmupChecks.includes(item.id);
+      const orderNum = item.order || (index + 1);
 
-    const card = document.createElement('div');
-    card.className = `workout-warmup-card ${isAllCompleted ? 'all-completed' : ''} ${isCollapsed ? 'collapsed' : ''}`;
-    card.dataset.routine = routineKey;
+      // Pills de tags estilo Notion
+      let tagsHtml = '';
+      const tagsList = Array.isArray(item.tags)
+        ? item.tags
+        : (item.tags ? String(item.tags).split(',').map(t => t.trim()).filter(Boolean) : ['Mobilidade']);
 
-    card.innerHTML = `
-      <div class="workout-warmup-header" title="Clique para expandir ou recolher o aquecimento">
-        <div class="warmup-header-left">
-          <div class="warmup-icon-badge">${isAllCompleted ? '✅' : '🔥'}</div>
-          <div class="warmup-title-area">
-            <div class="warmup-card-title">
-              <span>Aquecimento & Mobilidade Pré-Treino</span>
-              <span class="warmup-badge-duration">⏱️ ${protocol.duration || '5-7 min'}</span>
-              <span class="warmup-badge-routine" style="border-color: ${protocol.color || 'var(--accent-emerald)'}; color: ${protocol.color || 'var(--accent-emerald-light)'};">
-                Treino ${routineKey}
-              </span>
-            </div>
-            <p class="warmup-card-subtitle">${protocol.title}</p>
-          </div>
-        </div>
-        <div class="warmup-header-right">
-          <div class="warmup-progress-tag ${isAllCompleted ? 'completed' : ''}">
-            ${isAllCompleted ? '🎉 Completo ✓' : `${completedCount}/${totalSteps} feitos`}
-          </div>
-          <button type="button" class="warmup-toggle-btn" aria-label="Recolher ou expandir">
-            ${isCollapsed ? 'Expandir ▾' : 'Recolher ▴'}
-          </button>
-        </div>
-      </div>
-
-      <div class="workout-warmup-body">
-        <div class="warmup-steps-grid">
-          ${protocol.steps.map((step) => {
-            const done = warmupChecks.includes(step.id);
-            const thumbImg = step.gifUrl || step.gifFallback || '';
-            return `
-              <div class="warmup-step-item ${done ? 'is-done' : ''}" data-step-id="${step.id}" tabIndex="0" role="checkbox" aria-checked="${done}">
-                <div class="warmup-checkbox-circle" title="Marcar como concluído">${done ? '✓' : ''}</div>
-                ${thumbImg ? `
-                  <div class="warmup-thumb-preview" data-step-id="${step.id}" title="Clique para ver o GIF de demonstração">
-                    <img src="${thumbImg}" alt="${step.title}" loading="lazy" onerror="if(this.src!=='${step.gifFallback||''}')this.src='${step.gifFallback||''}'">
-                    <span class="warmup-thumb-badge">GIF</span>
-                  </div>
-                ` : ''}
-                <div class="warmup-step-content">
-                  <div class="warmup-step-header">
-                    <span class="warmup-step-icon">${step.icon || '⚡'}</span>
-                    <span>${step.title}</span>
-                    ${step.reps ? `<span class="warmup-step-reps-badge">${step.reps}</span>` : ''}
-                  </div>
-                  <div class="warmup-step-desc">${step.desc}</div>
-                  <button type="button" class="warmup-btn-demo" data-step-id="${step.id}" title="Ver GIF em tamanho ampliado e instruções anatômicas">
-                    🎬 Ver GIF & Como Fazer
-                  </button>
-                </div>
-              </div>
-            `;
-          }).join('')}
-        </div>
-
-        <div class="warmup-footer-actions">
-          <div class="warmup-status-msg ${isAllCompleted ? 'completed' : ''}">
-            ${isAllCompleted 
-              ? '✨ Aquecimento concluído! Músculos e articulações ativados e protegidos para as cargas.' 
-              : '💡 Execute esta sequência de ativação antes das primeiras séries de trabalho.'}
-          </div>
-          <button type="button" class="warmup-btn-bulk">
-            ${isAllCompleted ? 'Desmarcar Todos' : 'Marcar Todos como Feitos'}
-          </button>
-        </div>
-      </div>
-    `;
-
-    // Toggle collapse ao clicar no header
-    const headerEl = card.querySelector('.workout-warmup-header');
-    const toggleBtn = card.querySelector('.warmup-toggle-btn');
-    headerEl.addEventListener('click', () => {
-      const willBeCollapsed = !card.classList.contains('collapsed');
-      card.classList.toggle('collapsed', willBeCollapsed);
-      toggleBtn.textContent = willBeCollapsed ? 'Expandir ▾' : 'Recolher ▴';
-      try {
-        localStorage.setItem(collapseKey, willBeCollapsed ? 'true' : 'false');
-      } catch (err) {}
-    });
-
-    // Clique na thumbnail ou no botão "Ver GIF & Como Fazer" abre o modal com o GIF e dicas biomecânicas
-    card.querySelectorAll('.warmup-thumb-preview, .warmup-btn-demo').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const stepId = btn.dataset.stepId;
-        const step = protocol.steps.find(s => s.id === stepId);
-        if (step && typeof openWorkoutGifModal === 'function') {
-          openWorkoutGifModal({
-            name: `${step.icon || ''} ${step.title}`,
-            tags: ['Aquecimento Dinâmico', `Treino ${routineKey}`, protocol.title],
-            gifUrl: step.gifUrl || step.gifFallback,
-            gifFallback: step.gifFallback,
-            notes: `
-              <strong>🎯 Meta:</strong> ${step.reps || '10 a 12 oscilações'}<br><br>
-              <strong>💡 Passo a Passo da Execução:</strong><br>${step.howTo || step.desc}<br><br>
-              <strong>🛡️ Prevenção & Reabilitação:</strong><br>${step.desc}
-            `,
-            sets: 1,
-            reps: step.reps || '10 a 12 reps',
-            restSeconds: 0
-          });
-        }
+      tagsList.forEach(t => {
+        const lower = t.toLowerCase();
+        let tagClass = 'generic';
+        if (lower.includes('aquec')) tagClass = 'aquecimento';
+        else if (lower.includes('mobilid')) tagClass = 'reabilitacao';
+        else if (lower.includes('ativ')) tagClass = 'fortalecimento';
+        else if (lower.includes('joelho') || lower.includes('quadril') || lower.includes('tornozelo') || lower.includes('virilha')) tagClass = 'reabilitacao';
+        tagsHtml += `<span class="notion-pill-tag ${tagClass}">${t}</span>`;
       });
-    });
 
-    // Clique em cada item da checklist de aquecimento (checkbox)
-    const stepItems = card.querySelectorAll('.warmup-step-item');
-    stepItems.forEach(item => {
-      const handleToggle = (e) => {
+      const card = document.createElement('div');
+      card.className = `notion-exercise-card notion-warmup-card ${isDone ? 'all-done' : ''}`;
+      card.dataset.warmupId = item.id;
+
+      const gifSrc = item.gifUrl || item.gifFallback || 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&auto=format&fit=crop';
+
+      card.innerHTML = `
+        <div class="notion-card-cover" data-warmup-id="${item.id}">
+          <span class="notion-order-tag">#${orderNum}</span>
+          <img src="${gifSrc}" alt="${item.name}" style="object-position: center ${item.imgPosY !== undefined ? item.imgPosY : 50}%;" loading="lazy" onerror="if(this.src!=='${item.gifFallback || ''}')this.src='${item.gifFallback || 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&auto=format&fit=crop'}'">
+          
+          <div class="notion-cover-actions">
+            <button type="button" class="notion-action-btn btn-zoom-warmup" title="Ampliar GIF e Instruções">
+              🔍 Zoom
+            </button>
+            <button type="button" class="notion-action-btn btn-reposition-warmup" title="Reposicionar Imagem (arraste para ajustar)">
+              📐 Reposicionar
+            </button>
+            <button type="button" class="notion-action-btn btn-edit-warmup" title="Editar Mobilidade / Trocar GIF">
+              ✏️ Editar
+            </button>
+          </div>
+        </div>
+
+        <div class="notion-card-body">
+          <div class="notion-card-title-row">
+            <h3 class="notion-card-title">🧘 ${orderNum} - ${item.name}</h3>
+          </div>
+
+          ${tagsHtml ? `<div class="notion-tags-row">${tagsHtml}</div>` : ''}
+
+          <div class="notion-card-meta">
+            ⏱️ <strong>${item.reps || '10 a 12 repetições'}</strong>
+          </div>
+
+          ${item.notes ? `
+            <p style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.45; margin: 0.5rem 0 0 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" title="${item.notes}">
+              💡 ${item.notes}
+            </p>
+          ` : ''}
+
+          <div class="notion-card-footer" style="margin-top: 0.85rem; padding-top: 0.75rem; border-top: 1px dashed rgba(255, 255, 255, 0.08);">
+            <button type="button" class="warmup-card-check-btn ${isDone ? 'checked' : ''}" data-warmup-id="${item.id}" title="${isDone ? 'Concluído (clique para desmarcar)' : 'Clique para marcar como feito'}">
+              <span class="warmup-check-circle">${isDone ? '✓' : ''}</span>
+              <span>${isDone ? 'Aquecimento Concluído' : 'Marcar como Feito'}</span>
+            </button>
+          </div>
+        </div>
+      `;
+
+      // Zoom no GIF ao clicar na capa ou no botão Zoom
+      card.querySelector('.notion-card-cover').addEventListener('click', (e) => {
+        if (e.target.closest('.btn-edit-warmup') || e.target.closest('.btn-reposition-warmup') || e.target.closest('.notion-reposition-bar')) return;
+        openWorkoutGifModal({
+          name: `${item.name}`,
+          tags: ['Aquecimento & Mobilidade', `Treino ${routineKey}`, ...(tagsList || [])],
+          gifUrl: item.gifUrl || item.gifFallback,
+          gifFallback: item.gifFallback,
+          notes: `
+            <strong>🎯 Meta:</strong> ${item.reps || '10 a 12 oscilações'}<br><br>
+            <strong>💡 Instruções & Benefício:</strong><br>${item.notes || 'Execução controlada sem trancos e respiração ritmada.'}
+          `,
+          sets: 1,
+          reps: item.reps || '10 reps',
+          restSeconds: 0
+        });
+      });
+
+      card.querySelector('.btn-zoom-warmup').addEventListener('click', (e) => {
         e.stopPropagation();
-        const stepId = item.dataset.stepId;
-        const res = HabitStorage.toggleWorkoutWarmupCheck(dateKey, stepId);
+        openWorkoutGifModal({
+          name: `${item.name}`,
+          tags: ['Aquecimento & Mobilidade', `Treino ${routineKey}`, ...(tagsList || [])],
+          gifUrl: item.gifUrl || item.gifFallback,
+          gifFallback: item.gifFallback,
+          notes: `
+            <strong>🎯 Meta:</strong> ${item.reps || '10 a 12 oscilações'}<br><br>
+            <strong>💡 Instruções & Benefício:</strong><br>${item.notes || 'Execução controlada sem trancos e respiração ritmada.'}
+          `,
+          sets: 1,
+          reps: item.reps || '10 reps',
+          restSeconds: 0
+        });
+      });
+
+      // Editar
+      card.querySelector('.btn-edit-warmup').addEventListener('click', (e) => {
+        e.stopPropagation();
+        openEditWarmupModal(routineKey, item);
+      });
+
+      // Reposicionar
+      card.querySelector('.btn-reposition-warmup').addEventListener('click', (e) => {
+        e.stopPropagation();
+        startWarmupRepositionMode(card, routineKey, item);
+      });
+
+      // Check Button
+      card.querySelector('.warmup-card-check-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        const res = HabitStorage.toggleWorkoutWarmupCheck(dateKey, item.id);
+        SoundFx.playPop();
 
         if (res.isChecked) {
-          SoundFx.playPop();
-          const updatedChecks = HabitStorage.getWorkoutWarmupChecks(dateKey);
-          const allNowDone = protocol.steps.every(s => updatedChecks.includes(s.id));
-          if (allNowDone) {
+          const allChecks = HabitStorage.getWorkoutWarmupChecks(dateKey);
+          const allDone = warmupList.every(w => allChecks.includes(w.id));
+          if (allDone && warmupList.length > 0) {
             SoundFx.playVictory();
-            showToast('Aquecimento completo! Músculos e articulações blindados! 🔥', '💪');
+            showToast('Todos os aquecimentos concluídos! Corpo pronto para o treino! 🔥', '💪');
             if (typeof Confetti !== 'undefined' && Confetti.launch) {
               Confetti.launch(e.clientX || window.innerWidth / 2, e.clientY || window.innerHeight / 2);
             }
           }
-        } else {
-          SoundFx.playPop();
         }
 
-        if (typeof onUpdate === 'function') {
-          onUpdate();
-        }
-      };
-
-      item.addEventListener('click', handleToggle);
-      item.addEventListener('keydown', (e) => {
-        if (e.key === ' ' || e.key === 'Enter') {
-          e.preventDefault();
-          handleToggle(e);
-        }
+        if (typeof onRefresh === 'function') onRefresh();
       });
+
+      container.appendChild(card);
+    });
+  }
+
+  // --- REPOSICIONAR IMAGEM DO AQUECIMENTO ESTILO NOTION ---
+  function startWarmupRepositionMode(cardEl, routineKey, warmupItem) {
+    const coverEl = cardEl.querySelector('.notion-card-cover');
+    const imgEl = coverEl.querySelector('img');
+    if (!coverEl || !imgEl) return;
+
+    if (coverEl.querySelector('.notion-reposition-bar')) return;
+
+    let isDragging = false;
+    let startY = 0;
+    let initialPosY = warmupItem.imgPosY !== undefined ? warmupItem.imgPosY : 50;
+    let currentPosY = initialPosY;
+
+    coverEl.classList.add('repositioning');
+
+    const barEl = document.createElement('div');
+    barEl.className = 'notion-reposition-bar';
+    barEl.innerHTML = `
+      <button type="button" class="btn-primary reposition-btn-save">Salvar posição</button>
+      <button type="button" class="btn-secondary reposition-btn-cancel">Cancelar</button>
+    `;
+    coverEl.appendChild(barEl);
+
+    const hintEl = document.createElement('div');
+    hintEl.className = 'notion-reposition-hint';
+    hintEl.textContent = 'Arraste para reposicionar';
+    coverEl.appendChild(hintEl);
+
+    const onPointerDown = (e) => {
+      if (e.target.closest('.notion-reposition-bar')) return;
+      isDragging = true;
+      startY = e.clientY || (e.touches && e.touches[0].clientY) || 0;
+      coverEl.classList.add('dragging');
+      if (e.preventDefault) e.preventDefault();
+    };
+
+    const onPointerMove = (e) => {
+      if (!isDragging) return;
+      const clientY = e.clientY || (e.touches && e.touches[0].clientY) || 0;
+      const deltaY = clientY - startY;
+      startY = clientY;
+
+      const coverHeight = coverEl.clientHeight || 200;
+      const percentDelta = (deltaY / coverHeight) * 70;
+      currentPosY = Math.max(0, Math.min(100, currentPosY - percentDelta));
+      imgEl.style.objectPosition = `center ${currentPosY}%`;
+    };
+
+    const onPointerUp = () => {
+      if (!isDragging) return;
+      isDragging = false;
+      initialPosY = currentPosY;
+      coverEl.classList.remove('dragging');
+    };
+
+    coverEl.addEventListener('mousedown', onPointerDown);
+    window.addEventListener('mousemove', onPointerMove);
+    window.addEventListener('mouseup', onPointerUp);
+
+    coverEl.addEventListener('touchstart', onPointerDown, { passive: false });
+    window.addEventListener('touchmove', onPointerMove, { passive: false });
+    window.addEventListener('touchend', onPointerUp);
+
+    const cleanUp = () => {
+      coverEl.classList.remove('repositioning', 'dragging');
+      barEl.remove();
+      hintEl.remove();
+      coverEl.removeEventListener('mousedown', onPointerDown);
+      window.removeEventListener('mousemove', onPointerMove);
+      window.removeEventListener('mouseup', onPointerUp);
+      coverEl.removeEventListener('touchstart', onPointerDown);
+      window.removeEventListener('touchmove', onPointerMove);
+      window.removeEventListener('touchend', onPointerUp);
+    };
+
+    barEl.querySelector('.reposition-btn-save').addEventListener('click', (e) => {
+      e.stopPropagation();
+      warmupItem.imgPosY = currentPosY;
+      HabitStorage.saveWarmupExercise(routineKey, warmupItem);
+      cleanUp();
+      showToast('Posição da imagem salva com sucesso!', '📐');
     });
 
-    // Botão de ação em massa (Marcar Todos / Desmarcar Todos)
-    const bulkBtn = card.querySelector('.warmup-btn-bulk');
-    if (bulkBtn) {
-      bulkBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const stepIds = protocol.steps.map(s => s.id);
-        const shouldCheckAll = !isAllCompleted;
-        HabitStorage.setAllWorkoutWarmupChecks(dateKey, stepIds, shouldCheckAll);
+    barEl.querySelector('.reposition-btn-cancel').addEventListener('click', (e) => {
+      e.stopPropagation();
+      imgEl.style.objectPosition = `center ${warmupItem.imgPosY !== undefined ? warmupItem.imgPosY : 50}%`;
+      cleanUp();
+    });
+  }
 
-        if (shouldCheckAll) {
-          SoundFx.playVictory();
-          showToast('Aquecimento concluído! Excelente preparação! 🔥', '💪');
-          if (typeof Confetti !== 'undefined' && Confetti.launch) {
-            Confetti.launch(e.clientX || window.innerWidth / 2, e.clientY || window.innerHeight / 2);
-          }
-        } else {
-          SoundFx.playPop();
-        }
+  // --- MODAL DE AQUECIMENTO / MOBILIDADE ---
+  function openNewWarmupModal() {
+    if (!warmupModal) return;
+    warmupModalTitle.textContent = '🧘 Novo Aquecimento / Mobilidade';
+    formWarmupId.value = '';
+    formWarmupName.value = '';
+    formWarmupRoutine.value = activeRoutineId;
+    formWarmupReps.value = '10 reps cada lado';
+    formWarmupTags.value = 'Mobilidade, Aquecimento';
+    formWarmupGif.value = '';
+    formWarmupNotes.value = '';
+    if (btnDeleteWarmup) btnDeleteWarmup.style.display = 'none';
+    warmupModal.classList.add('active');
+    formWarmupName.focus();
+  }
 
-        if (typeof onUpdate === 'function') {
-          onUpdate();
-        }
-      });
-    }
+  function openEditWarmupModal(routineKey, warmupItem) {
+    if (!warmupModal) return;
+    warmupModalTitle.textContent = '✏️ Editar Aquecimento / Mobilidade';
+    formWarmupId.value = warmupItem.id;
+    formWarmupName.value = warmupItem.name;
+    formWarmupRoutine.value = routineKey;
+    formWarmupReps.value = warmupItem.reps || '10 reps cada lado';
+    formWarmupTags.value = Array.isArray(warmupItem.tags) ? warmupItem.tags.join(', ') : (warmupItem.tags || '');
+    formWarmupGif.value = warmupItem.gifUrl || '';
+    formWarmupNotes.value = warmupItem.notes || '';
+    if (btnDeleteWarmup) btnDeleteWarmup.style.display = 'inline-flex';
+    warmupModal.classList.add('active');
+    formWarmupName.focus();
+  }
 
-    return card;
+  function closeWarmupModal() {
+    if (warmupModal) warmupModal.classList.remove('active');
+  }
+
+  if (btnAddWarmup) btnAddWarmup.addEventListener('click', openNewWarmupModal);
+  if (btnCloseWarmupModal) btnCloseWarmupModal.addEventListener('click', closeWarmupModal);
+  if (btnCancelWarmupModal) btnCancelWarmupModal.addEventListener('click', closeWarmupModal);
+
+  if (warmupForm) {
+    warmupForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id = formWarmupId.value.trim();
+      const name = formWarmupName.value.trim();
+      const routineKey = formWarmupRoutine.value || activeRoutineId;
+      const reps = formWarmupReps.value.trim() || '10 reps cada lado';
+      const tagsStr = formWarmupTags.value.trim();
+      const tags = tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(Boolean) : ['Mobilidade'];
+      const gifUrl = formWarmupGif.value.trim();
+      const notes = formWarmupNotes.value.trim();
+
+      if (!name) return;
+
+      const warmupData = {
+        name,
+        reps,
+        tags,
+        gifUrl: gifUrl || null,
+        gifFallback: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&auto=format&fit=crop',
+        notes
+      };
+      if (id) warmupData.id = id;
+
+      HabitStorage.saveWarmupExercise(routineKey, warmupData);
+      closeWarmupModal();
+      renderWorkoutTab();
+      renderDailyWorkoutSubtab();
+      showToast(id ? 'Aquecimento atualizado com sucesso!' : 'Novo aquecimento adicionado!', '🧘');
+    });
+  }
+
+  if (btnDeleteWarmup) {
+    btnDeleteWarmup.addEventListener('click', () => {
+      const id = formWarmupId.value.trim();
+      const routineKey = formWarmupRoutine.value || activeRoutineId;
+      if (!id) return;
+      if (confirm('Tem certeza que deseja excluir este exercício de aquecimento/mobilidade?')) {
+        HabitStorage.deleteWarmupExercise(routineKey, id);
+        closeWarmupModal();
+        renderWorkoutTab();
+        renderDailyWorkoutSubtab();
+        showToast('Aquecimento removido com sucesso!', '🗑️');
+      }
+    });
   }
 
   function renderWorkoutTab() {
@@ -2212,28 +2381,38 @@ document.addEventListener('DOMContentLoaded', () => {
       name: `Treino ${activeRoutineId}`,
       subtitle: 'Personalizado',
       badge: 'Ficha',
+      warmup: [],
       exercises: []
     };
 
     if (notionRoutineTitle) notionRoutineTitle.textContent = `${routine.name} • ${routine.subtitle || ''}`;
     if (notionRoutineBadge) notionRoutineBadge.textContent = routine.badge || 'Ficha';
 
+    const warmupList = Array.isArray(routine.warmup) ? routine.warmup : [];
     const exercises = Array.isArray(routine.exercises) ? routine.exercises : [];
     const dateKey = HabitStorage.formatDateKey(CURRENT_YEAR, CURRENT_MONTH, selectedDay);
     const dayLog = HabitStorage.getDayWorkoutLog(dateKey);
 
-    // Renderiza o card retrátil de aquecimento e mobilidade
-    if (notionWorkoutWarmupContainer) {
-      notionWorkoutWarmupContainer.innerHTML = '';
-      const warmupCard = createWarmupCardElement(activeRoutineId, dateKey, () => {
+    // 1. Renderiza a Galeria de Aquecimento & Mobilidade (Cards com GIF e Check)
+    if (notionWarmupGallery) {
+      renderWarmupCardsTo(notionWarmupGallery, activeRoutineId, dateKey, warmupList, dayLog, () => {
         renderWorkoutTab();
         renderDailyWorkoutSubtab();
       });
-      if (warmupCard) {
-        notionWorkoutWarmupContainer.appendChild(warmupCard);
+    }
+
+    if (notionWarmupProgress) {
+      const warmupChecks = HabitStorage.getWorkoutWarmupChecks(dateKey);
+      const warmupDoneCount = warmupList.filter(w => warmupChecks.includes(w.id)).length;
+      notionWarmupProgress.textContent = `${warmupDoneCount}/${warmupList.length} concluídos`;
+      if (warmupDoneCount === warmupList.length && warmupList.length > 0) {
+        notionWarmupProgress.classList.add('completed');
+      } else {
+        notionWarmupProgress.classList.remove('completed');
       }
     }
 
+    // 2. Renderiza a Galeria de Fortalecimento
     notionWorkoutGallery.innerHTML = '';
 
     if (exercises.length === 0) {
@@ -2393,23 +2572,65 @@ document.addEventListener('DOMContentLoaded', () => {
 
     dailyWorkoutPanel.appendChild(banner);
 
-    // Card retrátil de aquecimento & mobilidade para a rotina do dia
-    const dailyWarmupCard = createWarmupCardElement(routineKey, dateKey, () => {
+    const warmupList = Array.isArray(routine.warmup) ? routine.warmup : [];
+    const warmupChecks = HabitStorage.getWorkoutWarmupChecks(dateKey);
+    const warmupDoneCount = warmupList.filter(w => warmupChecks.includes(w.id)).length;
+    const isWarmupDone = warmupDoneCount === warmupList.length && warmupList.length > 0;
+
+    // Seção 1: Aquecimento & Mobilidade Pré-Treino
+    const warmupSection = document.createElement('div');
+    warmupSection.className = 'workout-section-block';
+    warmupSection.innerHTML = `
+      <div class="workout-section-header">
+        <div class="workout-section-title-box">
+          <span class="workout-section-icon">🧘</span>
+          <div>
+            <h3 class="workout-section-title">Aquecimento Dinâmico & Mobilidade</h3>
+            <p class="workout-section-subtitle">Preparação articular, ativação de glúteos e prevenção de lesões</p>
+          </div>
+        </div>
+        <div class="workout-section-actions">
+          <span class="workout-section-progress ${isWarmupDone ? 'completed' : ''}">
+            ${warmupDoneCount}/${warmupList.length} concluídos
+          </span>
+        </div>
+      </div>
+      <div class="notion-gallery-grid" id="daily-warmup-gallery"></div>
+    `;
+    const dailyWarmupGrid = warmupSection.querySelector('#daily-warmup-gallery');
+    renderWarmupCardsTo(dailyWarmupGrid, routineKey, dateKey, warmupList, dayLog, () => {
       renderDailyWorkoutSubtab();
       renderWorkoutTab();
     });
-    if (dailyWarmupCard) {
-      dailyWorkoutPanel.appendChild(dailyWarmupCard);
-    }
+    dailyWorkoutPanel.appendChild(warmupSection);
 
-    const cardsGrid = document.createElement('div');
-    cardsGrid.className = 'notion-gallery-grid';
-    dailyWorkoutPanel.appendChild(cardsGrid);
-
-    renderExerciseCardsTo(cardsGrid, routineKey, dateKey, exercises, dayLog, () => {
+    // Seção 2: Ficha de Fortalecimento & Hipertrofia
+    const exerciseSection = document.createElement('div');
+    exerciseSection.className = 'workout-section-block';
+    exerciseSection.style.marginTop = '2rem';
+    exerciseSection.innerHTML = `
+      <div class="workout-section-header">
+        <div class="workout-section-title-box">
+          <span class="workout-section-icon">🏋️</span>
+          <div>
+            <h3 class="workout-section-title">Ficha de Fortalecimento & Cargas</h3>
+            <p class="workout-section-subtitle">Séries pesadas e anotação de cargas</p>
+          </div>
+        </div>
+        <div class="workout-section-actions">
+          <span class="workout-section-progress ${isAllCompleted ? 'completed' : ''}">
+            ${completedCount}/${exercises.length} concluídos
+          </span>
+        </div>
+      </div>
+      <div class="notion-gallery-grid" id="daily-exercise-gallery"></div>
+    `;
+    const dailyExerciseGrid = exerciseSection.querySelector('#daily-exercise-gallery');
+    renderExerciseCardsTo(dailyExerciseGrid, routineKey, dateKey, exercises, dayLog, () => {
       renderDailyWorkoutSubtab();
       renderWorkoutTab();
     });
+    dailyWorkoutPanel.appendChild(exerciseSection);
   }
 
   // --- MODAL: Grade Semanal de Treinos (Configuração) ---

@@ -264,6 +264,8 @@ document.addEventListener('DOMContentLoaded', () => {
      Priority Alerts Banner Rendering
      ========================================================================== */
   function renderPriorityBanner() {
+    if (!priorityAlertsBanner || !priorityBannerText) return;
+
     const dayAlerts = HabitStorage.getDayAlerts(CURRENT_YEAR, CURRENT_MONTH, selectedDay);
     const activeAlerts = dayAlerts.filter(a => !a.isDone);
 

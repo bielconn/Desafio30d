@@ -324,10 +324,46 @@ const WorkoutData = {
       duration: '5 a 7 min',
       color: '#3b82f6',
       steps: [
-        { id: 'wa1', icon: '🚶', title: 'Cardio Leve', desc: '3 a 5 min de caminhada rápida ou esteira para elevar a temperatura corporal e circulação.' },
-        { id: 'wa2', icon: '🔄', title: 'Manguito Rotador (Rotação Externa)', desc: '2 séries de 15 reps com elástico ou polia leve. Essencial para blindar o ombro contra lesões no supino.' },
-        { id: 'wa3', icon: '🙆', title: 'Alongamento Dinâmico de Peitoral', desc: '12 repetições abrindo os braços em cruz com amplitude progressiva e sem dar trancos.' },
-        { id: 'wa4', icon: '⚡', title: 'Série de Reconhecimento no Supino', desc: '1 série de 12 a 15 reps apenas com a barra vazia para ajustar a trajetória motora antes das cargas.' }
+        {
+          id: 'wa1',
+          icon: '🚶',
+          title: 'Cardio Leve',
+          desc: '3 a 5 min de caminhada rápida ou esteira para elevar a temperatura corporal e circulação.',
+          reps: '3 a 5 minutos',
+          gifUrl: 'https://images.unsplash.com/photo-1538805060514-97d9cc17730c?w=600&auto=format&fit=crop',
+          gifFallback: 'https://images.unsplash.com/photo-1538805060514-97d9cc17730c?w=600&auto=format&fit=crop',
+          howTo: 'Caminhada rápida ou esteira com braços oscilando naturalmente. Ritmo contínuo para elevar os batimentos cardíacos e aquecer os músculos.'
+        },
+        {
+          id: 'wa2',
+          icon: '🔄',
+          title: 'Manguito Rotador (Rotação Externa)',
+          desc: '2 séries de 15 reps com elástico ou polia leve. Essencial para blindar o ombro contra lesões no supino.',
+          reps: '2 x 15 repetições',
+          gifUrl: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/External_Rotation/0.jpg',
+          gifFallback: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&auto=format&fit=crop',
+          howTo: 'Mantenha o cotovelo colado à lateral da costela em 90 graus. Gire o antebraço suavemente para fora sem afastar o cotovelo do corpo.'
+        },
+        {
+          id: 'wa3',
+          icon: '🙆',
+          title: 'Alongamento Dinâmico de Peitoral',
+          desc: '12 repetições abrindo os braços em cruz com amplitude progressiva e sem dar trancos.',
+          reps: '12 repetições',
+          gifUrl: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Chest_And_Front_Of_Shoulder_Stretch/0.jpg',
+          gifFallback: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&auto=format&fit=crop',
+          howTo: 'Em pé, abra os dois braços na horizontal estufando o peito. Cruze os braços à frente do peito e repita com movimento fluido.'
+        },
+        {
+          id: 'wa4',
+          icon: '⚡',
+          title: 'Série de Reconhecimento no Supino',
+          desc: '1 série de 12 a 15 reps apenas com a barra vazia para ajustar a trajetória motora antes das cargas.',
+          reps: '12 a 15 repetições (Barra Vazia)',
+          gifUrl: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Bench_Press_-_Medium_Grip/0.jpg',
+          gifFallback: 'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=600&auto=format&fit=crop',
+          howTo: 'Deite no banco, escápulas aduzidas (fechadas). Desça a barra vazia controlando até encostar suavemente no peito e suba alinhando a respiração.'
+        }
       ]
     },
     B: {
@@ -337,11 +373,56 @@ const WorkoutData = {
       duration: '6 a 8 min',
       color: '#10b981',
       steps: [
-        { id: 'wb1', icon: '🚴', title: 'Cardio Leve (Bike ou Esteira)', desc: '5 min em ritmo moderado para lubrificar as cartilagens dos joelhos e quadris.' },
-        { id: 'wb2', icon: '🦵', title: 'Mobilidade de Quadril 90/90 no Solo', desc: '10 rotações lentas de cada lado. Destrava a cápsula articular do quadril e protege a pelve e virilha.' },
-        { id: 'wb3', icon: '🧘', title: 'Alongamento Dinâmico de Adutores & Flexores', desc: '10 a 12 oscilações suaves em base aberta. Previne pinçamento no púbis e dores na virilha.' },
-        { id: 'wb4', icon: '⚡', title: 'Ponte de Glúteo no Solo (Ativação)', desc: '15 a 20 reps segurando 2 segundos no topo. "Acorda" os glúteos para estabilizar o agachamento e o hack.' },
-        { id: 'wb5', icon: '🦶', title: 'Mobilidade de Tornozelo na Parede', desc: '10 repetições por perna sem levantar o calcanhar. Garante amplitude profunda e sem dor no joelho.' }
+        {
+          id: 'wb1',
+          icon: '🚴',
+          title: 'Cardio Leve (Bike ou Esteira)',
+          desc: '5 min em ritmo moderado para lubrificar as cartilagens dos joelhos e quadris.',
+          reps: '5 minutos',
+          gifUrl: 'https://images.unsplash.com/photo-1538805060514-97d9cc17730c?w=600&auto=format&fit=crop',
+          gifFallback: 'https://images.unsplash.com/photo-1538805060514-97d9cc17730c?w=600&auto=format&fit=crop',
+          howTo: 'Pedale com cadência constante (70-80 rpm) sem carga pesada. O objetivo é aquecer o líquido sinovial articular.'
+        },
+        {
+          id: 'wb2',
+          icon: '🦵',
+          title: 'Mobilidade de Quadril 90/90 no Solo',
+          desc: '10 rotações lentas de cada lado. Destrava a cápsula articular do quadril e protege a pelve e virilha.',
+          reps: '10 rotações de cada lado',
+          gifUrl: 'https://i.makeagif.com/media/7-17-2021/zNHLoV.gif',
+          gifFallback: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&auto=format&fit=crop',
+          howTo: 'Sente-se no solo. Coloque a perna da frente em ângulo de 90° e a perna de trás também em 90°. Sem tirar os calcanhares do chão, gire os joelhos suavemente para o outro lado, alternando as posições sem pressa.'
+        },
+        {
+          id: 'wb3',
+          icon: '🧘',
+          title: 'Alongamento Dinâmico de Adutores & Flexores',
+          desc: '10 a 12 oscilações suaves em base aberta. Previne pinçamento no púbis e dores na virilha.',
+          reps: '10 a 12 oscilações suaves',
+          gifUrl: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Thigh_Adductor/0.jpg',
+          gifFallback: 'https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=600&auto=format&fit=crop',
+          howTo: 'Em 4 apoios com uma perna estendida para a lateral (sola do pé no chão), balance o quadril suavemente para trás e para frente. Sinta o alongamento da virilha/adutor sem dor aguda.'
+        },
+        {
+          id: 'wb4',
+          icon: '⚡',
+          title: 'Ponte de Glúteo no Solo (Ativação)',
+          desc: '15 a 20 reps segurando 2 segundos no topo. "Acorda" os glúteos para estabilizar o agachamento e o hack.',
+          reps: '15 a 20 reps (Pausa 2s)',
+          gifUrl: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Glute_Bridge/0.jpg',
+          gifFallback: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=600&auto=format&fit=crop',
+          howTo: 'Deitado de barriga para cima, pés no chão na largura dos ombros. Suba a bacia apertando os glúteos com força por 2 segundos no topo, protegendo a lombar.'
+        },
+        {
+          id: 'wb5',
+          icon: '🦶',
+          title: 'Mobilidade de Tornozelo na Parede',
+          desc: '10 repetições por perna sem levantar o calcanhar. Garante amplitude profunda e sem dor no joelho.',
+          reps: '10 reps por perna',
+          gifUrl: 'https://i.makeagif.com/media/4-22-2017/41sRtF.gif',
+          gifFallback: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&auto=format&fit=crop',
+          howTo: 'Fique de frente para a parede com o pé a cerca de 5 a 10 cm. Mantenha o calcanhar 100% cravado no chão e empurre o joelho para frente tentando encostar na parede. Segure 1 segundo e volte.'
+        }
       ]
     },
     C: {
@@ -351,10 +432,46 @@ const WorkoutData = {
       duration: '5 a 7 min',
       color: '#a855f7',
       steps: [
-        { id: 'wc1', icon: '🚶', title: 'Cardio Leve', desc: '3 a 5 min de aquecimento geral para elevar o fluxo sanguíneo.' },
-        { id: 'wc2', icon: '🐈', title: 'Mobilidade Cat-Cow no Solo', desc: '10 ciclos lentos de flexão e extensão da coluna para mobilizar as vértebras.' },
-        { id: 'wc3', icon: '🤸', title: 'Alongamento Dinâmico de Posteriores', desc: '10 repetições de afundo com rotação de tronco para soltar isquiotibiais e glúteos.' },
-        { id: 'wc4', icon: '⚡', title: 'Prancha Isométrica Ativa', desc: '30 a 45 segundos travando glúteo e abdômen para estabilizar a lombar antes dos puxadores.' }
+        {
+          id: 'wc1',
+          icon: '🚶',
+          title: 'Cardio Leve',
+          desc: '3 a 5 min de aquecimento geral para elevar o fluxo sanguíneo.',
+          reps: '3 a 5 minutos',
+          gifUrl: 'https://images.unsplash.com/photo-1538805060514-97d9cc17730c?w=600&auto=format&fit=crop',
+          gifFallback: 'https://images.unsplash.com/photo-1538805060514-97d9cc17730c?w=600&auto=format&fit=crop',
+          howTo: 'Caminhada ou trote leve para elevar a temperatura muscular antes dos exercícios dorsais.'
+        },
+        {
+          id: 'wc2',
+          icon: '🐈',
+          title: 'Mobilidade Cat-Cow no Solo',
+          desc: '10 ciclos lentos de flexão e extensão da coluna para mobilizar as vértebras.',
+          reps: '10 ciclos lentos',
+          gifUrl: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cat_Stretch/0.jpg',
+          gifFallback: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=600&auto=format&fit=crop',
+          howTo: 'Em 4 apoios, expire arredondando as costas para cima (olhando para o umbigo). Inspire abrindo o peito e arqueando suavemente para baixo (olhando à frente).'
+        },
+        {
+          id: 'wc3',
+          icon: '🤸',
+          title: 'Alongamento Dinâmico de Posteriores',
+          desc: '10 repetições de afundo com rotação de tronco para soltar isquiotibiais e glúteos.',
+          reps: '10 repetições alternadas',
+          gifUrl: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/World_Greatest_Stretch/0.jpg',
+          gifFallback: 'https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=600&auto=format&fit=crop',
+          howTo: 'Dê um passo longo à frente em afundo, apoie a mão oposta no chão e gire o tronco em direção ao joelho da frente, soltando a musculatura posterior da coxa.'
+        },
+        {
+          id: 'wc4',
+          icon: '⚡',
+          title: 'Prancha Isométrica Ativa',
+          desc: '30 a 45 segundos travando glúteo e abdômen para estabilizar a lombar antes dos puxadores.',
+          reps: '30 a 45 segundos',
+          gifUrl: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Plank/0.jpg',
+          gifFallback: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&auto=format&fit=crop',
+          howTo: 'Apoie os antebraços e pontas dos pés. Mantenha o corpo em linha reta travando glúteo e abdômen como uma prancha sólida.'
+        }
       ]
     },
     D: {
@@ -364,10 +481,46 @@ const WorkoutData = {
       duration: '5 a 7 min',
       color: '#f59e0b',
       steps: [
-        { id: 'wd1', icon: '🚴', title: 'Cardio Leve', desc: '5 min de bike ou caminhada contínua moderada.' },
-        { id: 'wd2', icon: '🔄', title: 'Dislocação de Ombros com Bastão ou Elástico', desc: '12 repetições em amplitude segura para soltar a articulação gleno-umeral.' },
-        { id: 'wd3', icon: '🧘', title: 'Ponte Unilateral para Glúteo', desc: '10 reps cada perna para ativação neuromuscular de pelve e estabilização de quadril.' },
-        { id: 'wd4', icon: '⚡', title: 'Perdigueiro (Bird-Dog) no Solo', desc: '10 reps alternadas com pausa de 2s no topo para controle postural e core.' }
+        {
+          id: 'wd1',
+          icon: '🚴',
+          title: 'Cardio Leve',
+          desc: '5 min de bike ou caminhada contínua moderada.',
+          reps: '5 minutos',
+          gifUrl: 'https://images.unsplash.com/photo-1538805060514-97d9cc17730c?w=600&auto=format&fit=crop',
+          gifFallback: 'https://images.unsplash.com/photo-1538805060514-97d9cc17730c?w=600&auto=format&fit=crop',
+          howTo: 'Ativação aeróbica geral de baixo impacto para oxigenação.'
+        },
+        {
+          id: 'wd2',
+          icon: '🔄',
+          title: 'Dislocação de Ombros com Bastão ou Elástico',
+          desc: '12 repetições em amplitude segura para soltar a articulação gleno-umeral.',
+          reps: '12 repetições',
+          gifUrl: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Shoulder_Stretch/0.jpg',
+          gifFallback: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&auto=format&fit=crop',
+          howTo: 'Segure um bastão ou elástico com pegada bem aberta. Com os braços estendidos, passe-o por cima da cabeça até as costas e retorne sem dobrar os cotovelos.'
+        },
+        {
+          id: 'wd3',
+          icon: '🧘',
+          title: 'Ponte Unilateral para Glúteo',
+          desc: '10 reps cada perna para ativação neuromuscular de pelve e estabilização de quadril.',
+          reps: '10 reps por perna',
+          gifUrl: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Single_Leg_Glute_Bridge/0.jpg',
+          gifFallback: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=600&auto=format&fit=crop',
+          howTo: 'Deitado de barriga para cima, uma perna dobrada no chão e a outra estendida para cima. Suba a bacia sustentando o peso apenas em uma perna.'
+        },
+        {
+          id: 'wd4',
+          icon: '⚡',
+          title: 'Perdigueiro (Bird-Dog) no Solo',
+          desc: '10 reps alternadas com pausa de 2s no topo para controle postural e core.',
+          reps: '10 reps alternadas',
+          gifUrl: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bird_Dog/0.jpg',
+          gifFallback: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&auto=format&fit=crop',
+          howTo: 'Em 4 apoios, estenda simultaneamente o braço direito à frente e a perna esquerda para trás até alinharem com o tronco. Segure 2s e alterne.'
+        }
       ]
     }
   }

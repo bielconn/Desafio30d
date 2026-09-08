@@ -186,6 +186,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnResetDefaultHabits = document.getElementById('btn-reset-default-habits');
   const btnOpenNewHabitModal = document.getElementById('btn-open-new-habit-modal');
 
+  // Cloud Sync DOM
+  const btnSaveCloud = document.getElementById('btn-save-cloud');
+  const btnLoadCloud = document.getElementById('btn-load-cloud');
+  const cloudSyncStatus = document.getElementById('cloud-sync-status');
+  const cloudSyncInfo = document.getElementById('cloud-sync-info');
+
+  // Cloud Sync Config
+  const CLOUD_TOKEN_KEY = 'desafio30d_cloud_token_v1';
+  const CLOUD_GIST_ID_KEY = 'desafio30d_gist_id_v1';
+  const CLOUD_GIST_FILENAME = 'desafio30d_backup.json';
+
   const WEEKDAY_NAMES = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
   /* ==========================================================================
@@ -1833,6 +1844,7 @@ document.addEventListener('DOMContentLoaded', () => {
   btnOpenBackup.addEventListener('click', () => {
     backupModal.classList.add('active');
     importJsonTextarea.value = '';
+    updateCloudStatus();
   });
 
   btnCloseBackupModal.addEventListener('click', () => {
@@ -1892,6 +1904,168 @@ document.addEventListener('DOMContentLoaded', () => {
       showToast('Todos os dados foram resetados.', '⚠️');
     }
   });
+
+  /* ==========================================================================
+     Cloud Sync (GitHub Gist)
+     ========================================================================== */
+  function getGistId() {
+    return localStorage.getItem(CLOUD_GIST_ID_KEY) || null;
+  }
+
+  function setGistId(id) {
+    localStorage.setItem(CLOUD_GIST_ID_KEY, id);
+  }
+
+  function getCloudToken() {
+    return localStorage.getItem(CLOUD_TOKEN_KEY) || null;
+  }
+
+  function updateCloudStatus() {
+    const gistId = getGistId();
+    const token = getCloudToken();
+    if (token && gistId && cloudSyncStatus) {
+      cloudSyncStatus.textContent = 'Nuvem vinculada';
+      cloudSyncStatus.style.color = 'var(--accent-emerald-light)';
+      cloudSyncStatus.style.borderColor = 'rgba(16,185,129,0.3)';
+      if (cloudSyncInfo) {
+        cloudSyncInfo.style.display = 'block';
+        cloudSyncInfo.textContent = 'Sincronizado via GitHub Gist. Token configurado neste dispositivo.';
+      }
+    } else if (token && cloudSyncStatus) {
+      cloudSyncStatus.textContent = 'Token configurado';
+      cloudSyncStatus.style.color = '#fbbf24';
+      cloudSyncStatus.style.borderColor = 'rgba(245,158,11,0.3)';
+      if (cloudSyncInfo) {
+        cloudSyncInfo.style.display = 'block';
+        cloudSyncInfo.textContent = 'Salve na nuvem para criar seu primeiro backup.';
+      }
+    } else if (cloudSyncStatus) {
+      cloudSyncStatus.textContent = 'Nao configurado';
+      cloudSyncStatus.style.color = '';
+      cloudSyncStatus.style.borderColor = '';
+      if (cloudSyncInfo) {
+        cloudSyncInfo.style.display = 'block';
+        cloudSyncInfo.textContent = 'Clique em Salvar na Nuvem para configurar o token do GitHub.';
+      }
+    }
+  }
+
+  async function cloudSave() {
+    let token = getCloudToken();
+    if (!token) {
+      token = window.prompt('Cole aqui seu GitHub Personal Access Token (ghp_...):\n\nCrie em: github.com/settings/tokens (marque scope "gist")');
+      if (!token || !token.trim()) return;
+      localStorage.setItem(CLOUD_TOKEN_KEY, token.trim());
+      token = token.trim();
+    }
+    btnSaveCloud.disabled = true;
+    btnSaveCloud.textContent = 'Salvando...';
+    try {
+      const backupData = HabitStorage.exportBackupJSON();
+      const gistId = getGistId();
+      const headers = {
+        'Authorization': 'token ' + token,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json',
+        'User-Agent': 'Desafio30d-App'
+      };
+      const body = JSON.stringify({
+        description: 'Desafio30d Backup - ' + new Date().toLocaleString('pt-BR'),
+        public: false,
+        files: { [CLOUD_GIST_FILENAME]: { content: backupData } }
+      });
+
+      let response;
+      if (gistId) {
+        response = await fetch('https://api.github.com/gists/' + gistId, {
+          method: 'PATCH', headers, body
+        });
+      } else {
+        response = await fetch('https://api.github.com/gists', {
+          method: 'POST', headers, body
+        });
+      }
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem(CLOUD_TOKEN_KEY);
+          throw new Error('Token invalido. Tente novamente.');
+        }
+        throw new Error('HTTP ' + response.status);
+      }
+      const data = await response.json();
+      setGistId(data.id);
+      // Salva o Gist ID para usar no outro dispositivo
+      localStorage.setItem('desafio30d_gist_id_v1', data.id);
+      updateCloudStatus();
+      const shareMsg = 'No celular, abra o app, va em Backup, clique Carregar da Nuvem e cole este ID: ' + data.id;
+      showToast('Dados salvos na nuvem! ' + shareMsg, 'ok');
+      if (cloudSyncInfo) {
+        cloudSyncInfo.style.display = 'block';
+        cloudSyncInfo.textContent = 'Gist ID para o celular: ' + data.id;
+      }
+    } catch (e) {
+      showToast('Erro: ' + e.message, 'erro');
+    } finally {
+      btnSaveCloud.disabled = false;
+      btnSaveCloud.textContent = 'Salvar na Nuvem';
+    }
+  }
+
+  async function cloudLoad() {
+    let token = getCloudToken();
+    if (!token) {
+      token = window.prompt('Cole aqui seu GitHub Personal Access Token (ghp_...):\n\nCrie em: github.com/settings/tokens (marque scope "gist")');
+      if (!token || !token.trim()) return;
+      localStorage.setItem(CLOUD_TOKEN_KEY, token.trim());
+      token = token.trim();
+    }
+    let gistId = getGistId();
+    if (!gistId) {
+      gistId = window.prompt('Cole aqui o Gist ID fornecido pelo outro dispositivo:');
+      if (!gistId || !gistId.trim()) return;
+      setGistId(gistId.trim());
+      gistId = gistId.trim();
+    }
+    btnLoadCloud.disabled = true;
+    btnLoadCloud.textContent = 'Carregando...';
+    try {
+      const headers = {
+        'Authorization': 'token ' + token,
+        'Accept': 'application/vnd.github.v3+json',
+        'User-Agent': 'Desafio30d-App'
+      };
+      const response = await fetch('https://api.github.com/gists/' + gistId, { headers });
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem(CLOUD_TOKEN_KEY);
+          throw new Error('Token invalido. Tente novamente.');
+        }
+        throw new Error('HTTP ' + response.status);
+      }
+      const data = await response.json();
+      const fileContent = data.files[CLOUD_GIST_FILENAME];
+      if (!fileContent) throw new Error('Arquivo de backup nao encontrado no Gist.');
+      const raw = fileContent.content || '';
+      if (!raw) throw new Error('Backup vazio.');
+      const res = HabitStorage.importBackupJSON(raw);
+      if (res.success) {
+        backupModal.classList.remove('active');
+        renderAllViews();
+        showToast('Dados carregados da nuvem com sucesso!', 'ok');
+      } else {
+        throw new Error(res.message);
+      }
+    } catch (e) {
+      showToast('Erro: ' + e.message, 'erro');
+    } finally {
+      btnLoadCloud.disabled = false;
+      btnLoadCloud.textContent = 'Carregar da Nuvem';
+    }
+  }
+
+  if (btnSaveCloud) btnSaveCloud.addEventListener('click', cloudSave);
+  if (btnLoadCloud) btnLoadCloud.addEventListener('click', cloudLoad);
 
   // Keyboard navigation shortcuts
   window.addEventListener('keydown', (e) => {

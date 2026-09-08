@@ -913,6 +913,53 @@ const HabitStorage = (() => {
     }
   }
 
+  function getExerciseWeightHistory(exerciseId) {
+    const all = getAllWorkoutsData();
+    const history = [];
+
+    Object.keys(all).sort().forEach(dKey => {
+      const dayData = all[dKey];
+      if (dayData && dayData.exercises && dayData.exercises[exerciseId]) {
+        const exLog = dayData.exercises[exerciseId];
+        const weightVal = parseFloat(exLog.weight);
+        if (!isNaN(weightVal) && weightVal > 0) {
+          const parts = dKey.split('-');
+          history.push({
+            dateKey: dKey,
+            year: parseInt(parts[0], 10),
+            month: parseInt(parts[1], 10),
+            day: parseInt(parts[2], 10),
+            weight: weightVal,
+            weightStr: String(exLog.weight),
+            setsDone: Array.isArray(exLog.setsDone) ? exLog.setsDone : []
+          });
+        }
+      }
+    });
+
+    return history;
+  }
+
+  function deleteExerciseDayWeight(dateKey, exerciseId) {
+    const all = getAllWorkoutsData();
+    if (all[dateKey] && all[dateKey].exercises && all[dateKey].exercises[exerciseId]) {
+      all[dateKey].exercises[exerciseId].weight = '';
+      saveAllWorkoutsData(all);
+    }
+    // Update last used weight cache
+    const hist = getExerciseWeightHistory(exerciseId);
+    if (hist.length > 0) {
+      const last = hist[hist.length - 1];
+      try {
+        localStorage.setItem(`desafio30d_last_weight_${exerciseId}`, last.weightStr);
+      } catch (e) {}
+    } else {
+      try {
+        localStorage.removeItem(`desafio30d_last_weight_${exerciseId}`);
+      } catch (e) {}
+    }
+  }
+
   // --- WORKOUT WARMUP & MOBILITY CHECKS ---
   function getWorkoutWarmupChecks(dateKey) {
     const log = getDayWorkoutLog(dateKey);
@@ -1276,6 +1323,8 @@ const HabitStorage = (() => {
     toggleWorkoutSet,
     setExerciseWeight,
     getLastUsedWeight,
+    getExerciseWeightHistory,
+    deleteExerciseDayWeight,
     getWorkoutWarmupChecks,
     toggleWorkoutWarmupCheck,
     setAllWorkoutWarmupChecks,

@@ -12,6 +12,12 @@ document.addEventListener('DOMContentLoaded', () => {
   let activeDailySubtab = 'subtab-habits';
   let journalSaveTimeout = null;
 
+  // Workout State
+  let selectedWorkoutDay = new Date().getDay(); // 0-6 (0=Dom, 1=Seg...)
+  let workoutRestInterval = null;
+  let workoutRestSecondsLeft = 60;
+  let workoutRestTargetSeconds = 60;
+
   // Current Book Cover State in Memory
   let currentDayBookCover = '';
 
@@ -190,6 +196,24 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnResetCloudToken = document.getElementById('btn-reset-cloud-token');
   const cloudSyncStatus = document.getElementById('cloud-sync-status');
   const cloudSyncInfo = document.getElementById('cloud-sync-info');
+
+  // Workout DOM
+  const workoutDaysNav = document.getElementById('workout-days-nav');
+  const workoutBadge = document.getElementById('workout-badge');
+  const workoutTitle = document.getElementById('workout-title');
+  const workoutDesc = document.getElementById('workout-desc');
+  const workoutProgressText = document.getElementById('workout-progress-text');
+  const workoutRestDisplay = document.getElementById('workout-rest-display');
+  const btnStartRest = document.getElementById('btn-start-rest');
+  const btnStopRest = document.getElementById('btn-stop-rest');
+  const workoutExercisesList = document.getElementById('workout-exercises-list');
+  const workoutGifModal = document.getElementById('workout-gif-modal');
+  const gifModalTitle = document.getElementById('gif-modal-title');
+  const gifModalMuscle = document.getElementById('gif-modal-muscle');
+  const gifModalImage = document.getElementById('gif-modal-image');
+  const gifModalNotes = document.getElementById('gif-modal-notes');
+  const btnCloseGifModal = document.getElementById('btn-close-gif-modal');
+  const btnDoneGifModal = document.getElementById('btn-done-gif-modal');
 
   // Cloud Sync Config
   const CLOUD_TOKEN_KEY = 'desafio30d_cloud_token_v1';
@@ -1649,6 +1673,244 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  /* ==========================================================================
+     Tab 6: Treinos da Semana & Ficha com GIFs dos Movimentos
+     ========================================================================== */
+  function renderWorkoutTab() {
+    if (!workoutExercisesList || typeof WorkoutData === 'undefined') return;
+
+    // Atualiza pills de navegação dos dias
+    const dayPills = document.querySelectorAll('.workout-day-pill');
+    dayPills.forEach(pill => {
+      const dayNum = parseInt(pill.dataset.day, 10);
+      if (dayNum === selectedWorkoutDay) {
+        pill.classList.add('active');
+      } else {
+        pill.classList.remove('active');
+      }
+    });
+
+    const routineKey = WorkoutData.schedule[selectedWorkoutDay] || 'rest';
+    const routine = WorkoutData.routines[routineKey] || WorkoutData.routines.rest;
+
+    // Atualiza cabeçalho do treino
+    if (workoutBadge) workoutBadge.textContent = routine.badge || 'Rotina do Dia';
+    if (workoutTitle) workoutTitle.textContent = `${routine.dayName} • ${routine.title}`;
+    if (workoutDesc) workoutDesc.textContent = routine.description || '';
+
+    const dateKey = HabitStorage.formatDateKey(CURRENT_YEAR, CURRENT_MONTH, selectedDay);
+    const dayLog = HabitStorage.getDayWorkoutLog(dateKey);
+
+    workoutExercisesList.innerHTML = '';
+
+    if (!routine.exercises || routine.exercises.length === 0) {
+      workoutExercisesList.innerHTML = `
+        <div style="text-align: center; padding: 3rem 1.5rem; background: var(--bg-card); border-radius: var(--radius-xl); border: 1px dashed var(--border-color);">
+          <div style="font-size: 3rem; margin-bottom: 0.75rem;">🌿</div>
+          <h3 style="font-size: 1.25rem; font-weight: 800; color: #ffffff; margin-bottom: 0.5rem;">Dia de Descanso & Regeneração</h3>
+          <p style="color: var(--text-muted); font-size: 0.9rem; max-width: 500px; margin: 0 auto; line-height: 1.6;">
+            A recuperação é essencial para o fortalecimento muscular e prevenção de dores articulares. Mantenha-se bem hidratado e durma bem!
+          </p>
+        </div>
+      `;
+      if (workoutProgressText) workoutProgressText.textContent = 'Descanso Programado';
+      return;
+    }
+
+    let totalCompletedExercises = 0;
+
+    routine.exercises.forEach(exercise => {
+      const exLog = (dayLog.exercises && dayLog.exercises[exercise.id]) ? dayLog.exercises[exercise.id] : { setsDone: [], weight: '' };
+      const setsDone = Array.isArray(exLog.setsDone) ? exLog.setsDone : [];
+      const isAllDone = setsDone.length >= exercise.sets;
+      if (isAllDone) totalCompletedExercises++;
+
+      const lastWeight = exLog.weight || HabitStorage.getLastUsedWeight(exercise.id) || '';
+
+      // Cria os botões de série
+      let setsButtonsHtml = '';
+      for (let s = 1; s <= exercise.sets; s++) {
+        const isDone = setsDone.includes(s);
+        setsButtonsHtml += `
+          <button type="button" class="set-check-btn ${isDone ? 'checked' : ''}" data-exercise-id="${exercise.id}" data-set-index="${s}" title="Marcar Série ${s}">
+            ${isDone ? '✓' : s}
+          </button>
+        `;
+      }
+
+      const card = document.createElement('div');
+      card.className = `workout-exercise-card ${isAllDone ? 'all-done' : ''}`;
+      card.innerHTML = `
+        <div class="exercise-gif-thumb-box" data-exercise-id="${exercise.id}" title="Clique para ver animação e execução">
+          <img src="${exercise.gifUrl}" alt="${exercise.name}" class="exercise-gif-thumb" onerror="this.src='${exercise.gifFallback || ''}'">
+          <div class="exercise-gif-zoom-badge">🔍 GIF</div>
+        </div>
+
+        <div class="exercise-main-info">
+          <div class="exercise-name-row">
+            <span class="exercise-name">${exercise.name}</span>
+            <span class="exercise-muscle-tag">${exercise.muscle}</span>
+          </div>
+          <div class="exercise-meta-info">
+            <strong>${exercise.sets} séries</strong> × <strong>${exercise.reps} reps</strong> • ⏱️ ${exercise.restSeconds || 60}s descanso
+          </div>
+          ${exercise.notes ? `<div class="exercise-biomech-tip">💡 <strong>Biomecânica:</strong> ${exercise.notes}</div>` : ''}
+        </div>
+
+        <div class="exercise-sets-tracker">
+          <div class="sets-group">
+            ${setsButtonsHtml}
+          </div>
+          <div class="exercise-weight-box" title="Carga utilizada neste exercício">
+            <input type="number" step="0.5" class="exercise-weight-input" data-exercise-id="${exercise.id}" placeholder="0" value="${lastWeight}">
+            <span class="weight-unit-label">kg</span>
+          </div>
+        </div>
+      `;
+
+      // Evento de clique na miniatura do GIF
+      card.querySelector('.exercise-gif-thumb-box').addEventListener('click', () => {
+        openWorkoutGifModal(exercise);
+      });
+
+      // Evento de clique nas séries
+      card.querySelectorAll('.set-check-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const exId = btn.dataset.exerciseId;
+          const sIdx = parseInt(btn.dataset.setIndex, 10);
+          const updatedSets = HabitStorage.toggleWorkoutSet(dateKey, exId, sIdx);
+          
+          SoundFx.playPop();
+          if (updatedSets.includes(sIdx)) {
+            startWorkoutRestTimer(exercise.restSeconds || 60);
+          }
+
+          renderWorkoutTab();
+        });
+      });
+
+      // Evento de alteração de carga (kg)
+      const weightInput = card.querySelector('.exercise-weight-input');
+      weightInput.addEventListener('change', () => {
+        const val = weightInput.value.trim();
+        HabitStorage.setExerciseWeight(dateKey, exercise.id, val);
+        showToast(`Carga de ${exercise.name} salva: ${val} kg!`, '🏋️');
+      });
+
+      workoutExercisesList.appendChild(card);
+    });
+
+    if (workoutProgressText) {
+      workoutProgressText.textContent = `${totalCompletedExercises}/${routine.exercises.length} concluídos`;
+      workoutProgressText.style.color = (totalCompletedExercises === routine.exercises.length && routine.exercises.length > 0) ? 'var(--accent-emerald-light)' : 'var(--text-main)';
+    }
+  }
+
+  function openWorkoutGifModal(exercise) {
+    if (!workoutGifModal) return;
+    if (gifModalTitle) gifModalTitle.textContent = exercise.name;
+    if (gifModalMuscle) gifModalMuscle.textContent = exercise.muscle;
+    if (gifModalImage) {
+      gifModalImage.src = exercise.gifUrl;
+      gifModalImage.onerror = () => {
+        if (exercise.gifFallback) gifModalImage.src = exercise.gifFallback;
+      };
+    }
+    if (gifModalNotes) {
+      gifModalNotes.innerHTML = `
+        <strong>Instruções de Execução:</strong> ${exercise.notes || 'Realize o movimento de forma controlada.'}<br><br>
+        <strong>Séries recomendadas:</strong> ${exercise.sets} séries de ${exercise.reps} repetições.<br>
+        <strong>Descanso sugerido:</strong> ${exercise.restSeconds || 60} segundos entre cada série.
+      `;
+    }
+    workoutGifModal.classList.add('active');
+  }
+
+  function startWorkoutRestTimer(seconds = 60) {
+    clearInterval(workoutRestInterval);
+    workoutRestTargetSeconds = seconds;
+    workoutRestSecondsLeft = seconds;
+    updateRestTimerDisplay();
+
+    if (btnStartRest) btnStartRest.style.display = 'none';
+    if (btnStopRest) btnStopRest.style.display = 'inline-flex';
+
+    workoutRestInterval = setInterval(() => {
+      if (workoutRestSecondsLeft > 0) {
+        workoutRestSecondsLeft--;
+        updateRestTimerDisplay();
+        if (workoutRestSecondsLeft === 0) {
+          clearInterval(workoutRestInterval);
+          SoundFx.playVictory();
+          showToast('⏰ Tempo de descanso encerrado! Hora da próxima série!', '💪');
+          if (btnStartRest) btnStartRest.style.display = 'inline-flex';
+          if (btnStopRest) btnStopRest.style.display = 'none';
+        }
+      }
+    }, 1000);
+  }
+
+  function stopWorkoutRestTimer() {
+    clearInterval(workoutRestInterval);
+    workoutRestSecondsLeft = workoutRestTargetSeconds;
+    updateRestTimerDisplay();
+    if (btnStartRest) btnStartRest.style.display = 'inline-flex';
+    if (btnStopRest) btnStopRest.style.display = 'none';
+  }
+
+  function updateRestTimerDisplay() {
+    if (!workoutRestDisplay) return;
+    const m = Math.floor(workoutRestSecondsLeft / 60);
+    const s = workoutRestSecondsLeft % 60;
+    workoutRestDisplay.textContent = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  }
+
+  // Workout Tab Listeners
+  const workoutDayPills = document.querySelectorAll('.workout-day-pill');
+  workoutDayPills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      workoutDayPills.forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      selectedWorkoutDay = parseInt(pill.dataset.day, 10);
+      renderWorkoutTab();
+    });
+  });
+
+  if (btnStartRest) {
+    btnStartRest.addEventListener('click', () => {
+      startWorkoutRestTimer(workoutRestTargetSeconds || 60);
+    });
+  }
+
+  if (btnStopRest) {
+    btnStopRest.addEventListener('click', stopWorkoutRestTimer);
+  }
+
+  const workoutRestPresets = document.querySelectorAll('.rest-preset-btn');
+  workoutRestPresets.forEach(btn => {
+    btn.addEventListener('click', () => {
+      workoutRestPresets.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const sec = parseInt(btn.dataset.sec, 10) || 60;
+      workoutRestTargetSeconds = sec;
+      workoutRestSecondsLeft = sec;
+      updateRestTimerDisplay();
+    });
+  });
+
+  if (btnCloseGifModal) {
+    btnCloseGifModal.addEventListener('click', () => {
+      workoutGifModal.classList.remove('active');
+    });
+  }
+
+  if (btnDoneGifModal) {
+    btnDoneGifModal.addEventListener('click', () => {
+      workoutGifModal.classList.remove('active');
+    });
+  }
+
   function renderAllViews() {
     updateHeroSection();
     renderChecklist();
@@ -1661,6 +1923,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (activeTab === 'tab-matrix') renderHeatmapMatrix();
     if (activeTab === 'tab-stats') renderStatsAndBadges();
     if (activeTab === 'tab-manage') renderManageHabits();
+    if (activeTab === 'tab-workout') renderWorkoutTab();
   }
 
   /* ==========================================================================
@@ -1683,6 +1946,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (activeTab === 'tab-matrix') renderHeatmapMatrix();
       if (activeTab === 'tab-stats') renderStatsAndBadges();
       if (activeTab === 'tab-manage') renderManageHabits();
+      if (activeTab === 'tab-workout') renderWorkoutTab();
     });
   });
 
@@ -2065,6 +2329,7 @@ document.addEventListener('DOMContentLoaded', () => {
         pomodoroModal.classList.remove('active');
         dayViewModal.classList.remove('active');
         timelineModal.classList.remove('active');
+        if (workoutGifModal) workoutGifModal.classList.remove('active');
       }
       return;
     }

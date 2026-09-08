@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Desafio 30 Dias de Setembro | Habit Tracker & Calendário</title>
   <meta name="description" content="Acompanhe seus 30 hábitos durante os 30 dias de setembro. Calendário interativo, checklist diário, matriz de calor, timer pomodoro, diário de bordo com capa de livro e alertas prioritários.">
-  <link rel="stylesheet" href="css/style.css?v=3.0">
+  <link rel="stylesheet" href="css/style.css?v=3.1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="icon" type="image/png" sizes="64x64" href="icon-64.png">
   <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
@@ -24,67 +24,64 @@
 
   <div class="app-container">
     
-    <!-- Top Header -->
+    <!-- Top Header Integrado com Navegação -->
     <header class="header">
-      <div class="brand-wrapper">
-        <div class="brand-icon">🎯</div>
-        <div class="brand-info">
-          <h1>Desafio 30 Dias</h1>
-          <span class="brand-badge">📅 Setembro 2026<span class="brand-badge-detail"> • 30 Hábitos, Foco & Alertas</span></span>
+      <div class="header-top-row">
+        <div class="brand-wrapper">
+          <div class="brand-icon">🎯</div>
+          <div class="brand-info">
+            <h1>Desafio 30 Dias</h1>
+            <span class="brand-badge">📅 Setembro 2026<span class="brand-badge-detail"> • 30 Hábitos, Foco & Alertas</span></span>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <!-- Quick Pomodoro trigger button -->
+          <button class="btn-secondary" id="btn-header-pomodoro" title="Abrir Timer Pomodoro" style="color: #fbbf24; border-color: rgba(245, 158, 11, 0.3);">
+            ⏱️ <span id="header-timer-text">Pomodoro</span>
+          </button>
+
+          <div class="streak-pill" id="global-streak-pill" title="Dias seguidos com alta consistência">
+            <span class="flame">🔥</span>
+            <span id="streak-count">0</span> Dias
+          </div>
+
+          <button class="icon-btn" id="btn-sound-toggle" title="Ativar/Desativar Som" aria-label="Toggle Som">
+            🔔
+          </button>
+
+          <button class="icon-btn" id="btn-open-backup" title="Backup & Configurações" aria-label="Backup">
+            💾
+          </button>
         </div>
       </div>
 
-      <div class="header-actions">
-        <!-- Quick Pomodoro trigger button -->
-        <button class="btn-secondary" id="btn-header-pomodoro" title="Abrir Timer Pomodoro" style="color: #fbbf24; border-color: rgba(245, 158, 11, 0.3);">
-          ⏱️ <span id="header-timer-text">Pomodoro</span>
-        </button>
+      <div class="header-nav-divider"></div>
 
-        <div class="streak-pill" id="global-streak-pill" title="Dias seguidos com alta consistência">
-          <span class="flame">🔥</span>
-          <span id="streak-count">0</span> Dias
+      <!-- Main Navigation Tabs Integrado -->
+      <nav class="nav-tabs-wrapper" aria-label="Navegação Principal">
+        <div class="nav-tabs">
+          <button class="nav-tab-btn active" data-tab="tab-daily">
+            <span>⚡</span> Visão do Dia
+          </button>
+          <button class="nav-tab-btn" data-tab="tab-calendar">
+            <span>📅</span> Calendário 30 Dias
+          </button>
+          <button class="nav-tab-btn" data-tab="tab-matrix">
+            <span>📊</span> Matriz de Consistência
+          </button>
+          <button class="nav-tab-btn" data-tab="tab-stats">
+            <span>🏆</span> Conquistas & Stats
+          </button>
+          <button class="nav-tab-btn" data-tab="tab-workout">
+            <span>🏋️</span> Treino
+          </button>
+          <button class="nav-tab-btn" data-tab="tab-manage">
+            <span>⚙️</span> Meus Hábitos
+          </button>
         </div>
-
-        <button class="icon-btn" id="btn-sound-toggle" title="Ativar/Desativar Som" aria-label="Toggle Som">
-          🔔
-        </button>
-
-        <button class="icon-btn" id="btn-open-backup" title="Backup & Configurações" aria-label="Backup">
-          💾
-        </button>
-      </div>
+      </nav>
     </header>
-
-    <!-- Priority Alerts Sticky Banner (Highlighted when today has urgent alerts) -->
-    <div id="priority-alerts-banner" class="priority-banner" style="display: none;">
-      <div class="priority-banner-content" id="priority-banner-text">
-        <!-- Injected via JavaScript -->
-      </div>
-    </div>
-
-    <!-- Main Navigation Tabs -->
-    <nav class="nav-tabs-wrapper" aria-label="Navegação Principal">
-      <div class="nav-tabs">
-        <button class="nav-tab-btn active" data-tab="tab-daily">
-          <span>⚡</span> Visão do Dia
-        </button>
-        <button class="nav-tab-btn" data-tab="tab-calendar">
-          <span>📅</span> Calendário 30 Dias
-        </button>
-        <button class="nav-tab-btn" data-tab="tab-matrix">
-          <span>📊</span> Matriz de Consistência
-        </button>
-        <button class="nav-tab-btn" data-tab="tab-stats">
-          <span>🏆</span> Conquistas & Stats
-        </button>
-        <button class="nav-tab-btn" data-tab="tab-workout">
-          <span>🏋️</span> Treino
-        </button>
-        <button class="nav-tab-btn" data-tab="tab-manage">
-          <span>⚙️</span> Meus Hábitos
-        </button>
-      </div>
-    </nav>
 
     <!-- Daily Hero Dashboard Card -->
     <section class="daily-hero-card">
@@ -1014,9 +1011,9 @@
   <div class="toast-container" id="toast-container"></div>
 
   <!-- Scripts -->
-  <script src="js/workouts-data.js?v=3.0"></script>
-  <script src="js/confetti.js?v=3.0"></script>
-  <script src="js/storage.js?v=3.0"></script>
-  <script src="js/app.js?v=3.0"></script>
+  <script src="js/workouts-data.js?v=3.1"></script>
+  <script src="js/confetti.js?v=3.1"></script>
+  <script src="js/storage.js?v=3.1"></script>
+  <script src="js/app.js?v=3.1"></script>
 </body>
 </html>

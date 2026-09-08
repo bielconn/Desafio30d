@@ -12,8 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
   let activeDailySubtab = 'subtab-habits';
   let journalSaveTimeout = null;
 
-  // Workout State
-  let selectedWorkoutDay = new Date().getDay(); // 0-6 (0=Dom, 1=Seg...)
+  // Workout State (Notion Gallery)
+  let activeRoutineId = 'A'; // 'A', 'B', 'C', 'D'
   let workoutRestInterval = null;
   let workoutRestSecondsLeft = 60;
   let workoutRestTargetSeconds = 60;
@@ -197,16 +197,37 @@ document.addEventListener('DOMContentLoaded', () => {
   const cloudSyncStatus = document.getElementById('cloud-sync-status');
   const cloudSyncInfo = document.getElementById('cloud-sync-info');
 
-  // Workout DOM
-  const workoutDaysNav = document.getElementById('workout-days-nav');
-  const workoutBadge = document.getElementById('workout-badge');
-  const workoutTitle = document.getElementById('workout-title');
-  const workoutDesc = document.getElementById('workout-desc');
-  const workoutProgressText = document.getElementById('workout-progress-text');
+  // Notion Workout DOM
+  const notionRoutineTabs = document.querySelectorAll('.notion-tab-btn');
+  const notionRoutineTitle = document.getElementById('notion-routine-title');
+  const notionRoutineBadge = document.getElementById('notion-routine-badge');
+  const notionRoutineProgress = document.getElementById('notion-routine-progress');
+  const notionWorkoutGallery = document.getElementById('notion-workout-gallery');
+  const btnAddExercise = document.getElementById('btn-add-exercise');
+  const btnResetWorkoutRoutines = document.getElementById('btn-reset-workout-routines');
   const workoutRestDisplay = document.getElementById('workout-rest-display');
   const btnStartRest = document.getElementById('btn-start-rest');
   const btnStopRest = document.getElementById('btn-stop-rest');
-  const workoutExercisesList = document.getElementById('workout-exercises-list');
+  const restPills = document.querySelectorAll('.rest-pill');
+
+  // Exercise Form Modal
+  const exerciseModal = document.getElementById('exercise-modal');
+  const exerciseModalTitle = document.getElementById('exercise-modal-title');
+  const btnCloseExerciseModal = document.getElementById('btn-close-exercise-modal');
+  const btnCancelExerciseModal = document.getElementById('btn-cancel-exercise-modal');
+  const exerciseForm = document.getElementById('exercise-form');
+  const formExerciseId = document.getElementById('form-exercise-id');
+  const formExerciseName = document.getElementById('form-exercise-name');
+  const formExerciseRoutine = document.getElementById('form-exercise-routine');
+  const formExerciseSets = document.getElementById('form-exercise-sets');
+  const formExerciseReps = document.getElementById('form-exercise-reps');
+  const formExerciseRest = document.getElementById('form-exercise-rest');
+  const formExerciseTags = document.getElementById('form-exercise-tags');
+  const formExerciseGif = document.getElementById('form-exercise-gif');
+  const formExerciseNotes = document.getElementById('form-exercise-notes');
+  const btnDeleteExercise = document.getElementById('btn-delete-exercise');
+
+  // GIF Fullscreen Modal
   const workoutGifModal = document.getElementById('workout-gif-modal');
   const gifModalTitle = document.getElementById('gif-modal-title');
   const gifModalMuscle = document.getElementById('gif-modal-muscle');
@@ -1674,107 +1695,155 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ==========================================================================
-     Tab 6: Treinos da Semana & Ficha com GIFs dos Movimentos
+     Tab 6: Galeria de Treinos Estilo Notion (Treinos A, B, C, D)
      ========================================================================== */
   function renderWorkoutTab() {
-    if (!workoutExercisesList || typeof WorkoutData === 'undefined') return;
+    if (!notionWorkoutGallery) return;
 
-    // Atualiza pills de navegação dos dias
-    const dayPills = document.querySelectorAll('.workout-day-pill');
-    dayPills.forEach(pill => {
-      const dayNum = parseInt(pill.dataset.day, 10);
-      if (dayNum === selectedWorkoutDay) {
-        pill.classList.add('active');
+    // Atualiza tabs ativas (A, B, C, D)
+    const tabs = document.querySelectorAll('.notion-tab-btn');
+    tabs.forEach(tab => {
+      if (tab.dataset.routine === activeRoutineId) {
+        tab.classList.add('active');
       } else {
-        pill.classList.remove('active');
+        tab.classList.remove('active');
       }
     });
 
-    const routineKey = WorkoutData.schedule[selectedWorkoutDay] || 'rest';
-    const routine = WorkoutData.routines[routineKey] || WorkoutData.routines.rest;
+    const routines = HabitStorage.getWorkoutRoutines();
+    const routine = routines[activeRoutineId] || {
+      id: activeRoutineId,
+      name: `Treino ${activeRoutineId}`,
+      subtitle: 'Personalizado',
+      badge: 'Ficha',
+      exercises: []
+    };
 
-    // Atualiza cabeçalho do treino
-    if (workoutBadge) workoutBadge.textContent = routine.badge || 'Rotina do Dia';
-    if (workoutTitle) workoutTitle.textContent = `${routine.dayName} • ${routine.title}`;
-    if (workoutDesc) workoutDesc.textContent = routine.description || '';
+    if (notionRoutineTitle) notionRoutineTitle.textContent = `${routine.name} • ${routine.subtitle || ''}`;
+    if (notionRoutineBadge) notionRoutineBadge.textContent = routine.badge || 'Ficha';
 
+    const exercises = Array.isArray(routine.exercises) ? routine.exercises : [];
     const dateKey = HabitStorage.formatDateKey(CURRENT_YEAR, CURRENT_MONTH, selectedDay);
     const dayLog = HabitStorage.getDayWorkoutLog(dateKey);
 
-    workoutExercisesList.innerHTML = '';
+    notionWorkoutGallery.innerHTML = '';
 
-    if (!routine.exercises || routine.exercises.length === 0) {
-      workoutExercisesList.innerHTML = `
-        <div style="text-align: center; padding: 3rem 1.5rem; background: var(--bg-card); border-radius: var(--radius-xl); border: 1px dashed var(--border-color);">
-          <div style="font-size: 3rem; margin-bottom: 0.75rem;">🌿</div>
-          <h3 style="font-size: 1.25rem; font-weight: 800; color: #ffffff; margin-bottom: 0.5rem;">Dia de Descanso & Regeneração</h3>
-          <p style="color: var(--text-muted); font-size: 0.9rem; max-width: 500px; margin: 0 auto; line-height: 1.6;">
-            A recuperação é essencial para o fortalecimento muscular e prevenção de dores articulares. Mantenha-se bem hidratado e durma bem!
+    if (exercises.length === 0) {
+      notionWorkoutGallery.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 3.5rem 1.5rem; background: var(--bg-card); border-radius: var(--radius-xl); border: 1px dashed var(--border-color);">
+          <div style="font-size: 3rem; margin-bottom: 0.75rem;">🏋️</div>
+          <h3 style="font-size: 1.25rem; font-weight: 800; color: #ffffff; margin-bottom: 0.5rem;">Nenhum exercício neste treino ainda</h3>
+          <p style="color: var(--text-muted); font-size: 0.9rem; max-width: 480px; margin: 0 auto 1.25rem auto;">
+            Clique no botão abaixo para adicionar exercícios, gifs e repetições para o ${routine.name}!
           </p>
+          <button class="btn-primary" onclick="document.getElementById('btn-add-exercise').click()">
+            + Adicionar Primeiro Exercício
+          </button>
         </div>
       `;
-      if (workoutProgressText) workoutProgressText.textContent = 'Descanso Programado';
+      if (notionRoutineProgress) notionRoutineProgress.textContent = '0/0 feitos';
       return;
     }
 
     let totalCompletedExercises = 0;
 
-    routine.exercises.forEach(exercise => {
+    exercises.forEach((exercise, index) => {
       const exLog = (dayLog.exercises && dayLog.exercises[exercise.id]) ? dayLog.exercises[exercise.id] : { setsDone: [], weight: '' };
       const setsDone = Array.isArray(exLog.setsDone) ? exLog.setsDone : [];
-      const isAllDone = setsDone.length >= exercise.sets;
+      const numSets = parseInt(exercise.sets, 10) || 4;
+      const isAllDone = setsDone.length >= numSets;
       if (isAllDone) totalCompletedExercises++;
 
       const lastWeight = exLog.weight || HabitStorage.getLastUsedWeight(exercise.id) || '';
 
-      // Cria os botões de série
+      // Pills de tags estilo Notion
+      let tagsHtml = '';
+      const tagsList = Array.isArray(exercise.tags) 
+        ? exercise.tags 
+        : (exercise.tags ? String(exercise.tags).split(',').map(t => t.trim()).filter(Boolean) : []);
+      
+      tagsList.forEach(t => {
+        const lower = t.toLowerCase();
+        let tagClass = 'generic';
+        if (lower.includes('aquec')) tagClass = 'aquecimento';
+        else if (lower.includes('fortalec') || lower.includes('hipertrof')) tagClass = 'fortalecimento';
+        else if (lower.includes('reabil') || lower.includes('joelho') || lower.includes('quadril')) tagClass = 'reabilitacao';
+        tagsHtml += `<span class="notion-pill-tag ${tagClass}">${t}</span>`;
+      });
+
+      // Botões de série
       let setsButtonsHtml = '';
-      for (let s = 1; s <= exercise.sets; s++) {
+      for (let s = 1; s <= numSets; s++) {
         const isDone = setsDone.includes(s);
         setsButtonsHtml += `
-          <button type="button" class="set-check-btn ${isDone ? 'checked' : ''}" data-exercise-id="${exercise.id}" data-set-index="${s}" title="Marcar Série ${s}">
+          <button type="button" class="notion-set-btn ${isDone ? 'checked' : ''}" data-exercise-id="${exercise.id}" data-set-index="${s}" title="Marcar Série ${s}">
             ${isDone ? '✓' : s}
           </button>
         `;
       }
 
       const card = document.createElement('div');
-      card.className = `workout-exercise-card ${isAllDone ? 'all-done' : ''}`;
+      card.className = `notion-exercise-card ${isAllDone ? 'all-done' : ''}`;
+      
+      const gifSrc = exercise.gifUrl || exercise.gifFallback || 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Full_Squat/0.jpg';
+      const orderNum = exercise.order || (index + 1);
+
       card.innerHTML = `
-        <div class="exercise-gif-thumb-box" data-exercise-id="${exercise.id}" title="Clique para ver animação e execução">
-          <img src="${exercise.gifUrl}" alt="${exercise.name}" class="exercise-gif-thumb" onerror="this.src='${exercise.gifFallback || ''}'">
-          <div class="exercise-gif-zoom-badge">🔍 GIF</div>
+        <div class="notion-card-cover" data-exercise-id="${exercise.id}">
+          <span class="notion-order-tag">#${orderNum}</span>
+          <img src="${gifSrc}" alt="${exercise.name}" loading="lazy" onerror="this.src='${exercise.gifFallback || 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&auto=format&fit=crop'}'">
+          
+          <div class="notion-cover-actions">
+            <button type="button" class="notion-action-btn btn-zoom-gif" title="Ampliar GIF e Instruções">
+              🔍 Zoom
+            </button>
+            <button type="button" class="notion-action-btn btn-edit-ex" title="Editar Exercício">
+              ✏️ Editar
+            </button>
+          </div>
         </div>
 
-        <div class="exercise-main-info">
-          <div class="exercise-name-row">
-            <span class="exercise-name">${exercise.name}</span>
-            <span class="exercise-muscle-tag">${exercise.muscle}</span>
+        <div class="notion-card-body">
+          <div class="notion-card-title-row">
+            <h3 class="notion-card-title">💪 ${orderNum} - ${exercise.name}</h3>
           </div>
-          <div class="exercise-meta-info">
-            <strong>${exercise.sets} séries</strong> × <strong>${exercise.reps} reps</strong> • ⏱️ ${exercise.restSeconds || 60}s descanso
-          </div>
-          ${exercise.notes ? `<div class="exercise-biomech-tip">💡 <strong>Biomecânica:</strong> ${exercise.notes}</div>` : ''}
-        </div>
 
-        <div class="exercise-sets-tracker">
-          <div class="sets-group">
-            ${setsButtonsHtml}
+          ${tagsHtml ? `<div class="notion-tags-row">${tagsHtml}</div>` : ''}
+
+          <div class="notion-card-meta">
+            <strong>${numSets} séries</strong> × <strong>${exercise.reps || '10 a 12'} reps</strong> • ⏱️ ${exercise.restSeconds || 60}s descanso
           </div>
-          <div class="exercise-weight-box" title="Carga utilizada neste exercício">
-            <input type="number" step="0.5" class="exercise-weight-input" data-exercise-id="${exercise.id}" placeholder="0" value="${lastWeight}">
-            <span class="weight-unit-label">kg</span>
+
+          <div class="notion-card-footer">
+            <div class="notion-sets-group">
+              ${setsButtonsHtml}
+            </div>
+
+            <div class="notion-weight-input-wrap" title="Carga utilizada">
+              <input type="number" step="0.5" class="notion-weight-input" data-exercise-id="${exercise.id}" placeholder="0" value="${lastWeight}">
+              <span class="notion-weight-unit">kg</span>
+            </div>
           </div>
         </div>
       `;
 
-      // Evento de clique na miniatura do GIF
-      card.querySelector('.exercise-gif-thumb-box').addEventListener('click', () => {
+      // Zoom no GIF ao clicar na capa ou no botão de zoom
+      card.querySelector('.notion-card-cover').addEventListener('click', (e) => {
+        if (e.target.closest('.btn-edit-ex')) return;
         openWorkoutGifModal(exercise);
       });
 
-      // Evento de clique nas séries
-      card.querySelectorAll('.set-check-btn').forEach(btn => {
+      // Editar Exercício
+      const btnEdit = card.querySelector('.btn-edit-ex');
+      if (btnEdit) {
+        btnEdit.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openEditExerciseModal(activeRoutineId, exercise);
+        });
+      }
+
+      // Check de Série
+      card.querySelectorAll('.notion-set-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
           const exId = btn.dataset.exerciseId;
@@ -1790,38 +1859,145 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       });
 
-      // Evento de alteração de carga (kg)
-      const weightInput = card.querySelector('.exercise-weight-input');
+      // Salvar peso
+      const weightInput = card.querySelector('.notion-weight-input');
       weightInput.addEventListener('change', () => {
         const val = weightInput.value.trim();
         HabitStorage.setExerciseWeight(dateKey, exercise.id, val);
-        showToast(`Carga de ${exercise.name} salva: ${val} kg!`, '🏋️');
+        showToast(`Carga salva: ${val} kg para ${exercise.name}!`, '🏋️');
       });
 
-      workoutExercisesList.appendChild(card);
+      notionWorkoutGallery.appendChild(card);
     });
 
-    if (workoutProgressText) {
-      workoutProgressText.textContent = `${totalCompletedExercises}/${routine.exercises.length} concluídos`;
-      workoutProgressText.style.color = (totalCompletedExercises === routine.exercises.length && routine.exercises.length > 0) ? 'var(--accent-emerald-light)' : 'var(--text-main)';
+    if (notionRoutineProgress) {
+      notionRoutineProgress.textContent = `${totalCompletedExercises}/${exercises.length} concluídos`;
+      notionRoutineProgress.style.color = (totalCompletedExercises === exercises.length && exercises.length > 0) ? 'var(--accent-emerald-light)' : '#fbbf24';
     }
+  }
+
+  function openNewExerciseModal() {
+    if (!exerciseModal) return;
+    exerciseModalTitle.textContent = '💪 Novo Exercício para o Treino';
+    formExerciseId.value = '';
+    formExerciseName.value = '';
+    formExerciseRoutine.value = activeRoutineId;
+    formExerciseSets.value = '4';
+    formExerciseReps.value = '10 a 12';
+    formExerciseRest.value = '60';
+    formExerciseTags.value = 'Fortalecimento';
+    formExerciseGif.value = '';
+    formExerciseNotes.value = '';
+    if (btnDeleteExercise) btnDeleteExercise.style.display = 'none';
+    exerciseModal.classList.add('active');
+    formExerciseName.focus();
+  }
+
+  function openEditExerciseModal(routineKey, exercise) {
+    if (!exerciseModal) return;
+    exerciseModalTitle.textContent = '✏️ Editar Exercício';
+    formExerciseId.value = exercise.id;
+    formExerciseName.value = exercise.name;
+    formExerciseRoutine.value = routineKey;
+    formExerciseSets.value = exercise.sets || 4;
+    formExerciseReps.value = exercise.reps || '10 a 12';
+    formExerciseRest.value = exercise.restSeconds || 60;
+    formExerciseTags.value = Array.isArray(exercise.tags) ? exercise.tags.join(', ') : (exercise.tags || '');
+    formExerciseGif.value = exercise.gifUrl || '';
+    formExerciseNotes.value = exercise.notes || '';
+    if (btnDeleteExercise) btnDeleteExercise.style.display = 'inline-flex';
+    exerciseModal.classList.add('active');
+    formExerciseName.focus();
+  }
+
+  function closeExerciseModal() {
+    if (exerciseModal) exerciseModal.classList.remove('active');
+  }
+
+  if (btnAddExercise) btnAddExercise.addEventListener('click', openNewExerciseModal);
+  if (btnCloseExerciseModal) btnCloseExerciseModal.addEventListener('click', closeExerciseModal);
+  if (btnCancelExerciseModal) btnCancelExerciseModal.addEventListener('click', closeExerciseModal);
+
+  if (btnResetWorkoutRoutines) {
+    btnResetWorkoutRoutines.addEventListener('click', () => {
+      if (confirm('Deseja restaurar as fichas de treino padrão do Notion (Treinos A, B, C, D)?')) {
+        HabitStorage.resetWorkoutRoutinesToDefault();
+        renderWorkoutTab();
+        showToast('Fichas de treino restauradas para o padrão Notion!', '↺');
+      }
+    });
+  }
+
+  if (exerciseForm) {
+    exerciseForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id = formExerciseId.value.trim();
+      const name = formExerciseName.value.trim();
+      const routineKey = formExerciseRoutine.value || activeRoutineId;
+      const sets = parseInt(formExerciseSets.value, 10) || 4;
+      const reps = formExerciseReps.value.trim() || '10 a 12';
+      const restSeconds = parseInt(formExerciseRest.value, 10) || 60;
+      const tagsStr = formExerciseTags.value.trim();
+      const tags = tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(Boolean) : ['Fortalecimento'];
+      const gifUrl = formExerciseGif.value.trim();
+      const notes = formExerciseNotes.value.trim();
+
+      if (!name) return;
+
+      const exerciseData = {
+        name,
+        sets,
+        reps,
+        restSeconds,
+        tags,
+        gifUrl,
+        notes
+      };
+
+      if (id) {
+        exerciseData.id = id;
+      }
+
+      HabitStorage.saveExercise(routineKey, exerciseData);
+      closeExerciseModal();
+      activeRoutineId = routineKey;
+      renderWorkoutTab();
+      showToast(id ? 'Exercício atualizado com sucesso!' : 'Novo exercício adicionado ao treino!', '💪');
+    });
+  }
+
+  if (btnDeleteExercise) {
+    btnDeleteExercise.addEventListener('click', () => {
+      const id = formExerciseId.value.trim();
+      const routineKey = formExerciseRoutine.value || activeRoutineId;
+      if (!id) return;
+      if (confirm('Tem certeza que deseja excluir este exercício da ficha?')) {
+        HabitStorage.deleteExercise(routineKey, id);
+        closeExerciseModal();
+        renderWorkoutTab();
+        showToast('Exercício removido com sucesso!', '🗑️');
+      }
+    });
   }
 
   function openWorkoutGifModal(exercise) {
     if (!workoutGifModal) return;
     if (gifModalTitle) gifModalTitle.textContent = exercise.name;
-    if (gifModalMuscle) gifModalMuscle.textContent = exercise.muscle;
+    if (gifModalMuscle) {
+      const tags = Array.isArray(exercise.tags) ? exercise.tags.join(' • ') : (exercise.tags || 'Exercício');
+      gifModalMuscle.textContent = tags;
+    }
     if (gifModalImage) {
-      gifModalImage.src = exercise.gifUrl;
+      gifModalImage.src = exercise.gifUrl || exercise.gifFallback || '';
       gifModalImage.onerror = () => {
         if (exercise.gifFallback) gifModalImage.src = exercise.gifFallback;
       };
     }
     if (gifModalNotes) {
       gifModalNotes.innerHTML = `
-        <strong>Instruções de Execução:</strong> ${exercise.notes || 'Realize o movimento de forma controlada.'}<br><br>
-        <strong>Séries recomendadas:</strong> ${exercise.sets} séries de ${exercise.reps} repetições.<br>
-        <strong>Descanso sugerido:</strong> ${exercise.restSeconds || 60} segundos entre cada série.
+        <strong>💡 Instruções & Biomecânica:</strong><br>${exercise.notes || 'Execução controlada mantendo postura correta e respiração ritmada.'}<br><br>
+        <strong>🎯 Meta da Série:</strong> ${exercise.sets} séries de ${exercise.reps || '10 a 12'} repetições.<br>
+        <strong>⏱️ Descanso Recomendado:</strong> ${exercise.restSeconds || 60} segundos entre séries.
       `;
     }
     workoutGifModal.classList.add('active');
@@ -1866,13 +2042,13 @@ document.addEventListener('DOMContentLoaded', () => {
     workoutRestDisplay.textContent = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   }
 
-  // Workout Tab Listeners
-  const workoutDayPills = document.querySelectorAll('.workout-day-pill');
-  workoutDayPills.forEach(pill => {
-    pill.addEventListener('click', () => {
-      workoutDayPills.forEach(p => p.classList.remove('active'));
-      pill.classList.add('active');
-      selectedWorkoutDay = parseInt(pill.dataset.day, 10);
+  // Notion Routine Tabs switching
+  const notionTabs = document.querySelectorAll('.notion-tab-btn');
+  notionTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      notionTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      activeRoutineId = tab.dataset.routine;
       renderWorkoutTab();
     });
   });
@@ -1887,7 +2063,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btnStopRest.addEventListener('click', stopWorkoutRestTimer);
   }
 
-  const workoutRestPresets = document.querySelectorAll('.rest-preset-btn');
+  const workoutRestPresets = document.querySelectorAll('.rest-pill');
   workoutRestPresets.forEach(btn => {
     btn.addEventListener('click', () => {
       workoutRestPresets.forEach(b => b.classList.remove('active'));
@@ -2330,6 +2506,7 @@ document.addEventListener('DOMContentLoaded', () => {
         dayViewModal.classList.remove('active');
         timelineModal.classList.remove('active');
         if (workoutGifModal) workoutGifModal.classList.remove('active');
+        if (exerciseModal) exerciseModal.classList.remove('active');
       }
       return;
     }

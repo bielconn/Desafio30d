@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Desafio 30 Dias de Setembro | Habit Tracker & Calendário</title>
   <meta name="description" content="Acompanhe seus 30 hábitos durante os 30 dias de setembro. Calendário interativo, checklist diário, matriz de calor, timer pomodoro, diário de bordo com capa de livro e alertas prioritários.">
-  <link rel="stylesheet" href="css/style.css?v=4.1">
+  <link rel="stylesheet" href="css/style.css?v=4.2">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="icon" type="image/png" sizes="64x64" href="icon-64.png">
   <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
@@ -1103,6 +1103,30 @@
     </div>
   </div>
 
+  <!-- MODAL: Histórico & Evolução de Cargas -->
+  <div class="modal-overlay" id="weight-history-modal">
+    <div class="modal-dialog" style="max-width: 620px;">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title" id="weight-history-modal-title">📈 Evolução de Carga</h3>
+          <span class="badge-status" id="weight-history-modal-badge" style="font-size: 0.75rem;">Histórico</span>
+        </div>
+        <button class="modal-close-btn" id="btn-close-weight-history-modal">&times;</button>
+      </div>
+
+      <div class="weight-history-content" id="weight-history-content">
+        <!-- Injetado dinamicamente via renderWeightHistoryModal() -->
+      </div>
+
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.25rem;">
+        <span style="font-size: 0.78rem; color: var(--text-muted);">
+          💡 Registre suas cargas no card a cada treino para acompanhar sua progressão
+        </span>
+        <button type="button" class="btn-secondary" id="btn-close-weight-history-footer">Fechar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: Backup & Restauração -->
   <div class="modal-overlay" id="backup-modal">
     <div class="modal-dialog">
@@ -1209,9 +1233,9 @@
   <div class="toast-container" id="toast-container"></div>
 
   <!-- Scripts -->
-  <script src="js/workouts-data.js?v=4.1"></script>
-  <script src="js/confetti.js?v=4.1"></script>
-  <script src="js/storage.js?v=4.1"></script>
-  <script src="js/app.js?v=4.1"></script>
+  <script src="js/workouts-data.js?v=4.2"></script>
+  <script src="js/confetti.js?v=4.2"></script>
+  <script src="js/storage.js?v=4.2"></script>
+  <script src="js/app.js?v=4.2"></script>
 </body>
 </html>

@@ -958,6 +958,15 @@ const HabitStorage = (() => {
       if (data) {
         const parsed = JSON.parse(data);
         if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) {
+          if (typeof WorkoutData !== 'undefined' && WorkoutData.defaultRoutines) {
+            Object.keys(WorkoutData.defaultRoutines).forEach(rKey => {
+              if (parsed[rKey]) {
+                if (!parsed[rKey].warmup || !Array.isArray(parsed[rKey].warmup) || parsed[rKey].warmup.length === 0) {
+                  parsed[rKey].warmup = JSON.parse(JSON.stringify(WorkoutData.defaultRoutines[rKey].warmup || []));
+                }
+              }
+            });
+          }
           return parsed;
         }
       }
@@ -968,6 +977,54 @@ const HabitStorage = (() => {
       return JSON.parse(JSON.stringify(WorkoutData.defaultRoutines));
     }
     return {};
+  }
+
+  function saveWarmupExercise(routineKey, warmupData) {
+    const routines = getWorkoutRoutines();
+    if (!routines[routineKey]) {
+      routines[routineKey] = {
+        id: routineKey,
+        name: `Treino ${routineKey}`,
+        subtitle: 'Personalizado',
+        badge: 'Ficha',
+        color: '#3b82f6',
+        warmup: [],
+        exercises: []
+      };
+    }
+    if (!Array.isArray(routines[routineKey].warmup)) {
+      routines[routineKey].warmup = [];
+    }
+
+    const list = routines[routineKey].warmup;
+    if (warmupData.id) {
+      const idx = list.findIndex(w => w.id === warmupData.id);
+      if (idx >= 0) {
+        list[idx] = { ...list[idx], ...warmupData };
+      } else {
+        list.push(warmupData);
+      }
+    } else {
+      const newWarmup = {
+        ...warmupData,
+        id: 'wm_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+        order: list.length + 1
+      };
+      list.push(newWarmup);
+    }
+
+    saveWorkoutRoutines(routines);
+    return routines[routineKey];
+  }
+
+  function deleteWarmupExercise(routineKey, warmupId) {
+    const routines = getWorkoutRoutines();
+    if (routines[routineKey] && Array.isArray(routines[routineKey].warmup)) {
+      routines[routineKey].warmup = routines[routineKey].warmup.filter(w => w.id !== warmupId);
+      routines[routineKey].warmup.forEach((w, i) => { w.order = i + 1; });
+      saveWorkoutRoutines(routines);
+    }
+    return routines[routineKey];
   }
 
   function saveWorkoutRoutines(routines) {
@@ -1227,6 +1284,8 @@ const HabitStorage = (() => {
     resetWorkoutRoutinesToDefault,
     saveExercise,
     deleteExercise,
+    saveWarmupExercise,
+    deleteWarmupExercise,
     getWeeklyWorkoutSchedule,
     saveWeeklyWorkoutSchedule,
     resetWeeklyWorkoutSchedule,

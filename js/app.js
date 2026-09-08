@@ -239,6 +239,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const formExerciseRest = document.getElementById('form-exercise-rest');
   const formExerciseTags = document.getElementById('form-exercise-tags');
   const formExerciseGif = document.getElementById('form-exercise-gif');
+  const btnUploadExerciseFile = document.getElementById('btn-upload-exercise-file');
+  const formExerciseFileInput = document.getElementById('form-exercise-file-input');
+  const exerciseMediaPreviewBox = document.getElementById('exercise-media-preview-box');
+  const exercisePreviewThumb = document.getElementById('exercise-preview-thumb');
+  const exercisePreviewName = document.getElementById('exercise-preview-name');
+  const exercisePreviewStatus = document.getElementById('exercise-preview-status');
+  const btnRemoveExerciseMedia = document.getElementById('btn-remove-exercise-media');
   const formExerciseNotes = document.getElementById('form-exercise-notes');
   const btnDeleteExercise = document.getElementById('btn-delete-exercise');
 
@@ -254,6 +261,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const formWarmupReps = document.getElementById('form-warmup-reps');
   const formWarmupTags = document.getElementById('form-warmup-tags');
   const formWarmupGif = document.getElementById('form-warmup-gif');
+  const btnUploadWarmupFile = document.getElementById('btn-upload-warmup-file');
+  const formWarmupFileInput = document.getElementById('form-warmup-file-input');
+  const warmupMediaPreviewBox = document.getElementById('warmup-media-preview-box');
+  const warmupPreviewThumb = document.getElementById('warmup-preview-thumb');
+  const warmupPreviewName = document.getElementById('warmup-preview-name');
+  const warmupPreviewStatus = document.getElementById('warmup-preview-status');
+  const btnRemoveWarmupMedia = document.getElementById('btn-remove-warmup-media');
   const formWarmupNotes = document.getElementById('form-warmup-notes');
   const btnDeleteWarmup = document.getElementById('btn-delete-warmup');
 
@@ -2274,6 +2288,78 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // --- UPLOAD DE MÍDIA DO COMPUTADOR (GIFs & Imagens para Exercícios e Aquecimentos) ---
+  let currentExerciseCustomMedia = null;
+  let currentWarmupCustomMedia = null;
+
+  function handleMediaFileUpload(file, onReady) {
+    if (!file) return;
+    const isImgOrGif = file.type.startsWith('image/') || file.name.toLowerCase().endsWith('.gif');
+    if (!isImgOrGif) {
+      showToast('Por favor, selecione um arquivo de imagem ou GIF válido.', '⚠️');
+      return;
+    }
+
+    const isGif = file.type === 'image/gif' || file.name.toLowerCase().endsWith('.gif');
+
+    // Se for GIF animado, preservamos integralmente via Base64 sem passar por canvas
+    if (isGif) {
+      if (file.size > 3.5 * 1024 * 1024) {
+        showToast('Aviso: GIF com mais de 3.5MB pode consumir muito espaço de armazenamento.', '⚠️');
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        onReady({
+          dataUrl: e.target.result,
+          fileName: file.name,
+          isGif: true,
+          sizeKb: Math.round(file.size / 1024)
+        });
+      };
+      reader.readAsDataURL(file);
+    } else {
+      // Se for imagem estática (PNG/JPG/WEBP), otimizamos via canvas para ficar leve
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const maxDim = 600;
+          let w = img.width;
+          let h = img.height;
+          if (w > h && w > maxDim) {
+            h = Math.round((h * maxDim) / w);
+            w = maxDim;
+          } else if (h > maxDim) {
+            w = Math.round((w * maxDim) / h);
+            h = maxDim;
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          const compressed = canvas.toDataURL('image/jpeg', 0.82);
+          onReady({
+            dataUrl: compressed,
+            fileName: file.name,
+            isGif: false,
+            sizeKb: Math.round(compressed.length * 0.75 / 1024)
+          });
+        };
+        img.onerror = () => {
+          onReady({
+            dataUrl: e.target.result,
+            fileName: file.name,
+            isGif: false,
+            sizeKb: Math.round(file.size / 1024)
+          });
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
   // --- MODAL DE AQUECIMENTO / MOBILIDADE ---
   function openNewWarmupModal() {
     if (!warmupModal) return;
@@ -2285,6 +2371,9 @@ document.addEventListener('DOMContentLoaded', () => {
     formWarmupTags.value = 'Mobilidade, Aquecimento';
     formWarmupGif.value = '';
     formWarmupNotes.value = '';
+    currentWarmupCustomMedia = null;
+    if (formWarmupFileInput) formWarmupFileInput.value = '';
+    if (warmupMediaPreviewBox) warmupMediaPreviewBox.style.display = 'none';
     if (btnDeleteWarmup) btnDeleteWarmup.style.display = 'none';
     warmupModal.classList.add('active');
     formWarmupName.focus();
@@ -2298,8 +2387,32 @@ document.addEventListener('DOMContentLoaded', () => {
     formWarmupRoutine.value = routineKey;
     formWarmupReps.value = warmupItem.reps || '10 reps cada lado';
     formWarmupTags.value = Array.isArray(warmupItem.tags) ? warmupItem.tags.join(', ') : (warmupItem.tags || '');
-    formWarmupGif.value = warmupItem.gifUrl || '';
     formWarmupNotes.value = warmupItem.notes || '';
+    if (formWarmupFileInput) formWarmupFileInput.value = '';
+
+    const gifVal = warmupItem.gifUrl || '';
+    if (gifVal) {
+      if (gifVal.startsWith('data:')) {
+        currentWarmupCustomMedia = gifVal;
+        formWarmupGif.value = '';
+        if (warmupPreviewThumb) warmupPreviewThumb.src = gifVal;
+        if (warmupPreviewName) warmupPreviewName.textContent = 'Arquivo do PC';
+        if (warmupPreviewStatus) warmupPreviewStatus.textContent = '✓ Mídia salva do seu computador';
+        if (warmupMediaPreviewBox) warmupMediaPreviewBox.style.display = 'flex';
+      } else {
+        currentWarmupCustomMedia = null;
+        formWarmupGif.value = gifVal;
+        if (warmupPreviewThumb) warmupPreviewThumb.src = gifVal;
+        if (warmupPreviewName) warmupPreviewName.textContent = 'Link Web';
+        if (warmupPreviewStatus) warmupPreviewStatus.textContent = '✓ URL da Web';
+        if (warmupMediaPreviewBox) warmupMediaPreviewBox.style.display = 'flex';
+      }
+    } else {
+      currentWarmupCustomMedia = null;
+      formWarmupGif.value = '';
+      if (warmupMediaPreviewBox) warmupMediaPreviewBox.style.display = 'none';
+    }
+
     if (btnDeleteWarmup) btnDeleteWarmup.style.display = 'inline-flex';
     warmupModal.classList.add('active');
     formWarmupName.focus();
@@ -2313,6 +2426,50 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnCloseWarmupModal) btnCloseWarmupModal.addEventListener('click', closeWarmupModal);
   if (btnCancelWarmupModal) btnCancelWarmupModal.addEventListener('click', closeWarmupModal);
 
+  if (btnUploadWarmupFile && formWarmupFileInput) {
+    btnUploadWarmupFile.addEventListener('click', () => {
+      formWarmupFileInput.click();
+    });
+
+    formWarmupFileInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) {
+        handleMediaFileUpload(e.target.files[0], (info) => {
+          currentWarmupCustomMedia = info.dataUrl;
+          formWarmupGif.value = '';
+          if (warmupPreviewThumb) warmupPreviewThumb.src = info.dataUrl;
+          if (warmupPreviewName) warmupPreviewName.textContent = info.fileName;
+          if (warmupPreviewStatus) warmupPreviewStatus.textContent = `✓ ${info.isGif ? 'GIF Animado' : 'Imagem'} (${info.sizeKb} KB) pronto!`;
+          if (warmupMediaPreviewBox) warmupMediaPreviewBox.style.display = 'flex';
+          showToast(`${info.isGif ? 'GIF animado' : 'Imagem'} carregado do PC!`, '📁');
+        });
+      }
+    });
+  }
+
+  if (btnRemoveWarmupMedia) {
+    btnRemoveWarmupMedia.addEventListener('click', () => {
+      currentWarmupCustomMedia = null;
+      formWarmupGif.value = '';
+      if (formWarmupFileInput) formWarmupFileInput.value = '';
+      if (warmupMediaPreviewBox) warmupMediaPreviewBox.style.display = 'none';
+    });
+  }
+
+  if (formWarmupGif) {
+    formWarmupGif.addEventListener('input', () => {
+      const val = formWarmupGif.value.trim();
+      if (val) {
+        currentWarmupCustomMedia = null;
+        if (warmupPreviewThumb) warmupPreviewThumb.src = val;
+        if (warmupPreviewName) warmupPreviewName.textContent = 'Link Web';
+        if (warmupPreviewStatus) warmupPreviewStatus.textContent = '✓ URL da Web';
+        if (warmupMediaPreviewBox) warmupMediaPreviewBox.style.display = 'flex';
+      } else if (!currentWarmupCustomMedia) {
+        if (warmupMediaPreviewBox) warmupMediaPreviewBox.style.display = 'none';
+      }
+    });
+  }
+
   if (warmupForm) {
     warmupForm.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -2322,7 +2479,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const reps = formWarmupReps.value.trim() || '10 reps cada lado';
       const tagsStr = formWarmupTags.value.trim();
       const tags = tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(Boolean) : ['Mobilidade'];
-      const gifUrl = formWarmupGif.value.trim();
+      const gifUrl = currentWarmupCustomMedia || formWarmupGif.value.trim() || null;
       const notes = formWarmupNotes.value.trim();
 
       if (!name) return;
@@ -2331,7 +2488,7 @@ document.addEventListener('DOMContentLoaded', () => {
         name,
         reps,
         tags,
-        gifUrl: gifUrl || null,
+        gifUrl,
         gifFallback: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&auto=format&fit=crop',
         notes
       };
@@ -2724,6 +2881,9 @@ document.addEventListener('DOMContentLoaded', () => {
     formExerciseTags.value = 'Fortalecimento';
     formExerciseGif.value = '';
     formExerciseNotes.value = '';
+    currentExerciseCustomMedia = null;
+    if (formExerciseFileInput) formExerciseFileInput.value = '';
+    if (exerciseMediaPreviewBox) exerciseMediaPreviewBox.style.display = 'none';
     if (btnDeleteExercise) btnDeleteExercise.style.display = 'none';
     exerciseModal.classList.add('active');
     formExerciseName.focus();
@@ -2739,8 +2899,32 @@ document.addEventListener('DOMContentLoaded', () => {
     formExerciseReps.value = exercise.reps || '10 a 12';
     formExerciseRest.value = exercise.restSeconds || 60;
     formExerciseTags.value = Array.isArray(exercise.tags) ? exercise.tags.join(', ') : (exercise.tags || '');
-    formExerciseGif.value = exercise.gifUrl || '';
     formExerciseNotes.value = exercise.notes || '';
+    if (formExerciseFileInput) formExerciseFileInput.value = '';
+
+    const gifVal = exercise.gifUrl || '';
+    if (gifVal) {
+      if (gifVal.startsWith('data:')) {
+        currentExerciseCustomMedia = gifVal;
+        formExerciseGif.value = '';
+        if (exercisePreviewThumb) exercisePreviewThumb.src = gifVal;
+        if (exercisePreviewName) exercisePreviewName.textContent = 'Arquivo do PC';
+        if (exercisePreviewStatus) exercisePreviewStatus.textContent = '✓ Mídia salva do seu computador';
+        if (exerciseMediaPreviewBox) exerciseMediaPreviewBox.style.display = 'flex';
+      } else {
+        currentExerciseCustomMedia = null;
+        formExerciseGif.value = gifVal;
+        if (exercisePreviewThumb) exercisePreviewThumb.src = gifVal;
+        if (exercisePreviewName) exercisePreviewName.textContent = 'Link Web';
+        if (exercisePreviewStatus) exercisePreviewStatus.textContent = '✓ URL da Web';
+        if (exerciseMediaPreviewBox) exerciseMediaPreviewBox.style.display = 'flex';
+      }
+    } else {
+      currentExerciseCustomMedia = null;
+      formExerciseGif.value = '';
+      if (exerciseMediaPreviewBox) exerciseMediaPreviewBox.style.display = 'none';
+    }
+
     if (btnDeleteExercise) btnDeleteExercise.style.display = 'inline-flex';
     exerciseModal.classList.add('active');
     formExerciseName.focus();
@@ -2753,6 +2937,50 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnAddExercise) btnAddExercise.addEventListener('click', openNewExerciseModal);
   if (btnCloseExerciseModal) btnCloseExerciseModal.addEventListener('click', closeExerciseModal);
   if (btnCancelExerciseModal) btnCancelExerciseModal.addEventListener('click', closeExerciseModal);
+
+  if (btnUploadExerciseFile && formExerciseFileInput) {
+    btnUploadExerciseFile.addEventListener('click', () => {
+      formExerciseFileInput.click();
+    });
+
+    formExerciseFileInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) {
+        handleMediaFileUpload(e.target.files[0], (info) => {
+          currentExerciseCustomMedia = info.dataUrl;
+          formExerciseGif.value = '';
+          if (exercisePreviewThumb) exercisePreviewThumb.src = info.dataUrl;
+          if (exercisePreviewName) exercisePreviewName.textContent = info.fileName;
+          if (exercisePreviewStatus) exercisePreviewStatus.textContent = `✓ ${info.isGif ? 'GIF Animado' : 'Imagem'} (${info.sizeKb} KB) pronto!`;
+          if (exerciseMediaPreviewBox) exerciseMediaPreviewBox.style.display = 'flex';
+          showToast(`${info.isGif ? 'GIF animado' : 'Imagem'} carregado do PC!`, '📁');
+        });
+      }
+    });
+  }
+
+  if (btnRemoveExerciseMedia) {
+    btnRemoveExerciseMedia.addEventListener('click', () => {
+      currentExerciseCustomMedia = null;
+      formExerciseGif.value = '';
+      if (formExerciseFileInput) formExerciseFileInput.value = '';
+      if (exerciseMediaPreviewBox) exerciseMediaPreviewBox.style.display = 'none';
+    });
+  }
+
+  if (formExerciseGif) {
+    formExerciseGif.addEventListener('input', () => {
+      const val = formExerciseGif.value.trim();
+      if (val) {
+        currentExerciseCustomMedia = null;
+        if (exercisePreviewThumb) exercisePreviewThumb.src = val;
+        if (exercisePreviewName) exercisePreviewName.textContent = 'Link Web';
+        if (exercisePreviewStatus) exercisePreviewStatus.textContent = '✓ URL da Web';
+        if (exerciseMediaPreviewBox) exerciseMediaPreviewBox.style.display = 'flex';
+      } else if (!currentExerciseCustomMedia) {
+        if (exerciseMediaPreviewBox) exerciseMediaPreviewBox.style.display = 'none';
+      }
+    });
+  }
 
   if (btnResetWorkoutRoutines) {
     btnResetWorkoutRoutines.addEventListener('click', () => {
@@ -2775,7 +3003,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const restSeconds = parseInt(formExerciseRest.value, 10) || 60;
       const tagsStr = formExerciseTags.value.trim();
       const tags = tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(Boolean) : ['Fortalecimento'];
-      const gifUrl = formExerciseGif.value.trim();
+      const gifUrl = currentExerciseCustomMedia || formExerciseGif.value.trim();
       const notes = formExerciseNotes.value.trim();
 
       if (!name) return;

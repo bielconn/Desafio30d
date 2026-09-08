@@ -69,8 +69,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnPrevDay = document.getElementById('btn-prev-day');
   const btnNextDay = document.getElementById('btn-next-day');
   const btnGoToday = document.getElementById('btn-go-today');
-  const btnCheckAll = document.getElementById('btn-check-all');
-  const btnUncheckAll = document.getElementById('btn-uncheck-all');
   const btnQuickAddHabit = document.getElementById('btn-quick-add-habit');
   const btnSoundToggle = document.getElementById('btn-sound-toggle');
   const btnOpenBackup = document.getElementById('btn-open-backup');
@@ -1739,24 +1737,6 @@ document.addEventListener('DOMContentLoaded', () => {
     selectedDay = todayDay || 1;
     renderAllViews();
     showToast(`Navegando para o dia de hoje (Dia ${selectedDay})`, '📅');
-  });
-
-  btnCheckAll.addEventListener('click', () => {
-    const dateKey = HabitStorage.formatDateKey(CURRENT_YEAR, CURRENT_MONTH, selectedDay);
-    HabitStorage.setAllDayChecks(dateKey, true);
-    renderAllViews();
-    SoundFx.playVictory();
-    Confetti.launch(35);
-    showToast(`Todos os hábitos do Dia ${selectedDay} marcados! 🎉`, '⭐');
-  });
-
-  btnUncheckAll.addEventListener('click', () => {
-    if (confirm(`Deseja desmarcar todos os hábitos do Dia ${selectedDay}?`)) {
-      const dateKey = HabitStorage.formatDateKey(CURRENT_YEAR, CURRENT_MONTH, selectedDay);
-      HabitStorage.setAllDayChecks(dateKey, false);
-      renderAllViews();
-      showToast(`Hábitos do Dia ${selectedDay} limpos.`, '✕');
-    }
   });
 
   btnSoundToggle.addEventListener('click', () => {

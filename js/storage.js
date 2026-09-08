@@ -913,6 +913,44 @@ const HabitStorage = (() => {
     }
   }
 
+  // --- WORKOUT WARMUP & MOBILITY CHECKS ---
+  function getWorkoutWarmupChecks(dateKey) {
+    const log = getDayWorkoutLog(dateKey);
+    return Array.isArray(log.warmupChecks) ? log.warmupChecks : [];
+  }
+
+  function toggleWorkoutWarmupCheck(dateKey, stepId) {
+    const all = getAllWorkoutsData();
+    if (!all[dateKey]) all[dateKey] = { exercises: {}, notes: '', completed: false, warmupChecks: [] };
+    if (!Array.isArray(all[dateKey].warmupChecks)) all[dateKey].warmupChecks = [];
+
+    const checks = all[dateKey].warmupChecks;
+    const idx = checks.indexOf(stepId);
+    let isChecked = false;
+    if (idx >= 0) {
+      checks.splice(idx, 1);
+      isChecked = false;
+    } else {
+      checks.push(stepId);
+      isChecked = true;
+    }
+    saveAllWorkoutsData(all);
+    return { checks, isChecked };
+  }
+
+  function setAllWorkoutWarmupChecks(dateKey, stepIds, value) {
+    const all = getAllWorkoutsData();
+    if (!all[dateKey]) all[dateKey] = { exercises: {}, notes: '', completed: false, warmupChecks: [] };
+    if (value) {
+      all[dateKey].warmupChecks = Array.from(new Set([...(all[dateKey].warmupChecks || []), ...stepIds]));
+    } else {
+      const stepSet = new Set(stepIds);
+      all[dateKey].warmupChecks = (all[dateKey].warmupChecks || []).filter(id => !stepSet.has(id));
+    }
+    saveAllWorkoutsData(all);
+    return all[dateKey].warmupChecks;
+  }
+
   // --- WORKOUT ROUTINES (Customização de Exercícios estilo Notion) ---
   function getWorkoutRoutines() {
     try {
@@ -1181,6 +1219,9 @@ const HabitStorage = (() => {
     toggleWorkoutSet,
     setExerciseWeight,
     getLastUsedWeight,
+    getWorkoutWarmupChecks,
+    toggleWorkoutWarmupCheck,
+    setAllWorkoutWarmupChecks,
     getWorkoutRoutines,
     saveWorkoutRoutines,
     resetWorkoutRoutinesToDefault,

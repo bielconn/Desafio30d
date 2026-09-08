@@ -210,6 +210,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnStopRest = document.getElementById('btn-stop-rest');
   const restPills = document.querySelectorAll('.rest-pill');
 
+  // Weekly Schedule DOM & Subtab Workout
+  const workoutWeeklyDaysGrid = document.getElementById('workout-weekly-days-grid');
+  const btnOpenWeeklyScheduleModal = document.getElementById('btn-open-weekly-schedule-modal');
+  const modalWeeklySchedule = document.getElementById('modal-weekly-schedule');
+  const btnCloseWeeklyScheduleModal = document.getElementById('btn-close-weekly-schedule-modal');
+  const btnCancelWeeklySchedule = document.getElementById('btn-cancel-weekly-schedule');
+  const btnResetDefaultSchedule = document.getElementById('btn-reset-default-schedule');
+  const formWeeklySchedule = document.getElementById('form-weekly-schedule');
+  const scheduleDaysList = document.getElementById('schedule-days-list');
+  const dailyWorkoutPanel = document.getElementById('daily-workout-panel');
+  const subtabWorkoutBadge = document.getElementById('subtab-workout-badge');
+
   // Exercise Form Modal
   const exerciseModal = document.getElementById('exercise-modal');
   const exerciseModalTitle = document.getElementById('exercise-modal-title');
@@ -393,8 +405,19 @@ document.addEventListener('DOMContentLoaded', () => {
       btnGoToday.style.background = 'rgba(139, 92, 246, 0.15)';
       btnGoToday.style.color = '#c4b5fd';
     }
+    if (subtabWorkoutBadge) {
+      const scheduledRoutine = HabitStorage.getRoutineForDay(CURRENT_YEAR, CURRENT_MONTH, selectedDay);
+      if (scheduledRoutine === 'REST') {
+        subtabWorkoutBadge.textContent = 'Descanso';
+        subtabWorkoutBadge.className = 'notification-badge badge-empty';
+      } else {
+        subtabWorkoutBadge.textContent = scheduledRoutine;
+        subtabWorkoutBadge.className = 'notification-badge badge-green';
+      }
+    }
 
     renderPriorityBanner();
+    renderDailyWorkoutSubtab();
   }
 
   /* ==========================================================================
@@ -1699,62 +1722,61 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ==========================================================================
      Tab 6: Galeria de Treinos Estilo Notion (Treinos A, B, C, D)
      ========================================================================== */
-  function renderWorkoutTab() {
-    if (!notionWorkoutGallery) return;
+  const WEEKDAY_ORDER = [1, 2, 3, 4, 5, 6, 0]; // Seg, Ter, Qua, Qui, Sex, Sáb, Dom
+  const WEEKDAY_SHORT = { 1: 'Seg', 2: 'Ter', 3: 'Qua', 4: 'Qui', 5: 'Sex', 6: 'Sáb', 0: 'Dom' };
 
-    // Atualiza tabs ativas (A, B, C, D)
-    const tabs = document.querySelectorAll('.notion-tab-btn');
-    tabs.forEach(tab => {
-      if (tab.dataset.routine === activeRoutineId) {
-        tab.classList.add('active');
-      } else {
-        tab.classList.remove('active');
-      }
-    });
+  /* ==========================================================================
+     Tab 6 & Subtab: Galeria de Treinos Estilo Notion & Grade Semanal
+     ========================================================================== */
+  function renderWeeklyScheduleBar() {
+    if (!workoutWeeklyDaysGrid) return;
+    const schedule = HabitStorage.getWeeklyWorkoutSchedule();
+    const dateObj = new Date(CURRENT_YEAR, CURRENT_MONTH - 1, selectedDay);
+    const todayWeekday = dateObj.getDay(); // 0 a 6
 
-    const routines = HabitStorage.getWorkoutRoutines();
-    const routine = routines[activeRoutineId] || {
-      id: activeRoutineId,
-      name: `Treino ${activeRoutineId}`,
-      subtitle: 'Personalizado',
-      badge: 'Ficha',
-      exercises: []
-    };
+    workoutWeeklyDaysGrid.innerHTML = '';
 
-    if (notionRoutineTitle) notionRoutineTitle.textContent = `${routine.name} • ${routine.subtitle || ''}`;
-    if (notionRoutineBadge) notionRoutineBadge.textContent = routine.badge || 'Ficha';
+    WEEKDAY_ORDER.forEach(wDay => {
+      const routineKey = schedule[wDay] || 'REST';
+      const isToday = (wDay === todayWeekday);
+      const isRoutineActive = (activeRoutineId === routineKey);
 
-    const exercises = Array.isArray(routine.exercises) ? routine.exercises : [];
-    const dateKey = HabitStorage.formatDateKey(CURRENT_YEAR, CURRENT_MONTH, selectedDay);
-    const dayLog = HabitStorage.getDayWorkoutLog(dateKey);
+      const pill = document.createElement('div');
+      pill.className = `workout-day-schedule-pill ${isToday ? 'today' : ''} ${isRoutineActive ? 'active' : ''}`;
+      pill.dataset.weekday = wDay;
+      pill.dataset.routine = routineKey;
 
-    notionWorkoutGallery.innerHTML = '';
+      const routineDisplay = routineKey === 'REST' ? 'Descanso' : `Treino ${routineKey}`;
 
-    if (exercises.length === 0) {
-      notionWorkoutGallery.innerHTML = `
-        <div style="grid-column: 1 / -1; text-align: center; padding: 3.5rem 1.5rem; background: var(--bg-card); border-radius: var(--radius-xl); border: 1px dashed var(--border-color);">
-          <div style="font-size: 3rem; margin-bottom: 0.75rem;">🏋️</div>
-          <h3 style="font-size: 1.25rem; font-weight: 800; color: #ffffff; margin-bottom: 0.5rem;">Nenhum exercício neste treino ainda</h3>
-          <p style="color: var(--text-muted); font-size: 0.9rem; max-width: 480px; margin: 0 auto 1.25rem auto;">
-            Clique no botão abaixo para adicionar exercícios, gifs e repetições para o ${routine.name}!
-          </p>
-          <button class="btn-primary" onclick="document.getElementById('btn-add-exercise').click()">
-            + Adicionar Primeiro Exercício
-          </button>
-        </div>
+      pill.innerHTML = `
+        ${isToday ? '<span class="pill-today-badge">HOJE</span>' : ''}
+        <span class="pill-weekday-abbr">${WEEKDAY_SHORT[wDay]}</span>
+        <span class="pill-routine-tag tag-${routineKey}">${routineDisplay}</span>
       `;
-      if (notionRoutineProgress) notionRoutineProgress.textContent = '0/0 feitos';
-      return;
-    }
 
-    let totalCompletedExercises = 0;
+      pill.addEventListener('click', () => {
+        if (routineKey !== 'REST') {
+          activeRoutineId = routineKey;
+          renderWorkoutTab();
+        } else {
+          showToast(`Hoje é dia de Descanso programado para ${WEEKDAY_NAMES[wDay]}. Você pode escolher qualquer treino (A, B, C, D) se quiser treinar!`, '🛋️');
+        }
+        renderWeeklyScheduleBar();
+      });
+
+      workoutWeeklyDaysGrid.appendChild(pill);
+    });
+  }
+
+  function renderExerciseCardsTo(container, routineKey, dateKey, exercises, dayLog, onRefresh) {
+    if (!container) return;
+    container.innerHTML = '';
 
     exercises.forEach((exercise, index) => {
       const exLog = (dayLog.exercises && dayLog.exercises[exercise.id]) ? dayLog.exercises[exercise.id] : { setsDone: [], weight: '' };
       const setsDone = Array.isArray(exLog.setsDone) ? exLog.setsDone : [];
       const numSets = parseInt(exercise.sets, 10) || 4;
       const isAllDone = setsDone.length >= numSets;
-      if (isAllDone) totalCompletedExercises++;
 
       const lastWeight = exLog.weight || HabitStorage.getLastUsedWeight(exercise.id) || '';
 
@@ -1769,7 +1791,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let tagClass = 'generic';
         if (lower.includes('aquec')) tagClass = 'aquecimento';
         else if (lower.includes('fortalec') || lower.includes('hipertrof')) tagClass = 'fortalecimento';
-        else if (lower.includes('reabil') || lower.includes('joelho') || lower.includes('quadril')) tagClass = 'reabilitacao';
+        else if (lower.includes('reabil') || lower.includes('joelho') || lower.includes('quadril') || lower.includes('perna')) tagClass = 'reabilitacao';
         tagsHtml += `<span class="notion-pill-tag ${tagClass}">${t}</span>`;
       });
 
@@ -1840,7 +1862,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (btnEdit) {
         btnEdit.addEventListener('click', (e) => {
           e.stopPropagation();
-          openEditExerciseModal(activeRoutineId, exercise);
+          openEditExerciseModal(routineKey, exercise);
         });
       }
 
@@ -1857,7 +1879,7 @@ document.addEventListener('DOMContentLoaded', () => {
             startWorkoutRestTimer(exercise.restSeconds || 60);
           }
 
-          renderWorkoutTab();
+          if (typeof onRefresh === 'function') onRefresh();
         });
       });
 
@@ -1869,13 +1891,287 @@ document.addEventListener('DOMContentLoaded', () => {
         showToast(`Carga salva: ${val} kg para ${exercise.name}!`, '🏋️');
       });
 
-      notionWorkoutGallery.appendChild(card);
+      container.appendChild(card);
+    });
+  }
+
+  function renderWorkoutTab() {
+    if (!notionWorkoutGallery) return;
+
+    renderWeeklyScheduleBar();
+
+    // Atualiza tabs ativas (A, B, C, D)
+    const tabs = document.querySelectorAll('.notion-tab-btn');
+    tabs.forEach(tab => {
+      if (tab.dataset.routine === activeRoutineId) {
+        tab.classList.add('active');
+      } else {
+        tab.classList.remove('active');
+      }
+    });
+
+    const routines = HabitStorage.getWorkoutRoutines();
+    const routine = routines[activeRoutineId] || {
+      id: activeRoutineId,
+      name: `Treino ${activeRoutineId}`,
+      subtitle: 'Personalizado',
+      badge: 'Ficha',
+      exercises: []
+    };
+
+    if (notionRoutineTitle) notionRoutineTitle.textContent = `${routine.name} • ${routine.subtitle || ''}`;
+    if (notionRoutineBadge) notionRoutineBadge.textContent = routine.badge || 'Ficha';
+
+    const exercises = Array.isArray(routine.exercises) ? routine.exercises : [];
+    const dateKey = HabitStorage.formatDateKey(CURRENT_YEAR, CURRENT_MONTH, selectedDay);
+    const dayLog = HabitStorage.getDayWorkoutLog(dateKey);
+
+    notionWorkoutGallery.innerHTML = '';
+
+    if (exercises.length === 0) {
+      notionWorkoutGallery.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 3.5rem 1.5rem; background: var(--bg-card); border-radius: var(--radius-xl); border: 1px dashed var(--border-color);">
+          <div style="font-size: 3rem; margin-bottom: 0.75rem;">🏋️</div>
+          <h3 style="font-size: 1.25rem; font-weight: 800; color: #ffffff; margin-bottom: 0.5rem;">Nenhum exercício neste treino ainda</h3>
+          <p style="color: var(--text-muted); font-size: 0.9rem; max-width: 480px; margin: 0 auto 1.25rem auto;">
+            Clique no botão abaixo para adicionar exercícios, gifs e repetições para o ${routine.name}!
+          </p>
+          <button class="btn-primary" onclick="document.getElementById('btn-add-exercise').click()">
+            + Adicionar Primeiro Exercício
+          </button>
+        </div>
+      `;
+      if (notionRoutineProgress) notionRoutineProgress.textContent = '0/0 feitos';
+      return;
+    }
+
+    let totalCompletedExercises = 0;
+    exercises.forEach(exercise => {
+      const exLog = (dayLog.exercises && dayLog.exercises[exercise.id]) ? dayLog.exercises[exercise.id] : { setsDone: [] };
+      const setsDone = Array.isArray(exLog.setsDone) ? exLog.setsDone : [];
+      const numSets = parseInt(exercise.sets, 10) || 4;
+      if (setsDone.length >= numSets) totalCompletedExercises++;
+    });
+
+    renderExerciseCardsTo(notionWorkoutGallery, activeRoutineId, dateKey, exercises, dayLog, () => {
+      renderWorkoutTab();
+      renderDailyWorkoutSubtab();
     });
 
     if (notionRoutineProgress) {
       notionRoutineProgress.textContent = `${totalCompletedExercises}/${exercises.length} concluídos`;
       notionRoutineProgress.style.color = (totalCompletedExercises === exercises.length && exercises.length > 0) ? 'var(--accent-emerald-light)' : '#fbbf24';
     }
+  }
+
+  // --- SUBTAB: Treino do Dia Conectado à Grade Semanal (Dentro da Visão do Dia) ---
+  function renderDailyWorkoutSubtab() {
+    if (!dailyWorkoutPanel) return;
+
+    const dateKey = HabitStorage.formatDateKey(CURRENT_YEAR, CURRENT_MONTH, selectedDay);
+    const dateObj = new Date(CURRENT_YEAR, CURRENT_MONTH - 1, selectedDay);
+    const dayOfWeek = WEEKDAY_NAMES[dateObj.getDay()];
+    const routineKey = HabitStorage.getRoutineForDay(CURRENT_YEAR, CURRENT_MONTH, selectedDay);
+
+    // Atualiza badge na barra de sub-abas
+    if (subtabWorkoutBadge) {
+      if (routineKey === 'REST') {
+        subtabWorkoutBadge.textContent = 'Descanso';
+        subtabWorkoutBadge.className = 'notification-badge badge-empty';
+      } else {
+        subtabWorkoutBadge.textContent = routineKey;
+        subtabWorkoutBadge.className = 'notification-badge badge-green';
+      }
+    }
+
+    dailyWorkoutPanel.innerHTML = '';
+
+    if (routineKey === 'REST') {
+      dailyWorkoutPanel.innerHTML = `
+        <div class="daily-workout-banner">
+          <div class="daily-workout-banner-info">
+            <div class="daily-workout-banner-icon">🛋️</div>
+            <div>
+              <h3 class="daily-workout-banner-title">${dayOfWeek} • Dia de Descanso & Recuperação</h3>
+              <p class="daily-workout-banner-desc">Recuperação muscular ativa, sono e hidratação. Ideal para caminhada leve, alongamento ou fisioterapia.</p>
+            </div>
+          </div>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button type="button" class="btn-secondary" id="btn-daily-open-schedule">
+              ⚙️ Ajustar Grade Semanal
+            </button>
+            <button type="button" class="btn-primary" id="btn-daily-train-anyway">
+              🏋️ Treinar Mesmo Assim
+            </button>
+          </div>
+        </div>
+
+        <div class="daily-workout-rest-card">
+          <div style="font-size: 3rem; margin-bottom: 0.75rem;">🧘</div>
+          <h3 style="font-size: 1.25rem; font-weight: 800; color: #ffffff; margin-bottom: 0.5rem;">Recuperação Muscular Programada</h3>
+          <p style="color: var(--text-muted); font-size: 0.9rem; max-width: 520px; margin: 0 auto 1.25rem auto; line-height: 1.5;">
+            Os músculos se regeneram e fortalecem durante o descanso! Se você quiser treinar hoje mesmo assim, clique em <strong>Treinar Mesmo Assim</strong> para abrir a galeria e escolher sua ficha.
+          </p>
+        </div>
+      `;
+
+      const btnDailyOpenSchedule = dailyWorkoutPanel.querySelector('#btn-daily-open-schedule');
+      if (btnDailyOpenSchedule) {
+        btnDailyOpenSchedule.addEventListener('click', openWeeklyScheduleModal);
+      }
+
+      const btnTrainAnyway = dailyWorkoutPanel.querySelector('#btn-daily-train-anyway');
+      if (btnTrainAnyway) {
+        btnTrainAnyway.addEventListener('click', () => {
+          const workoutTabBtn = document.querySelector('.nav-tab-btn[data-tab="tab-workout"]');
+          if (workoutTabBtn) workoutTabBtn.click();
+        });
+      }
+      return;
+    }
+
+    // Rotina ativa agendada para hoje (A, B, C ou D)
+    const routines = HabitStorage.getWorkoutRoutines();
+    const routine = routines[routineKey] || {
+      id: routineKey,
+      name: `Treino ${routineKey}`,
+      subtitle: 'Personalizado',
+      badge: 'Ficha',
+      exercises: []
+    };
+
+    const dayLog = HabitStorage.getDayWorkoutLog(dateKey);
+    const exercises = Array.isArray(routine.exercises) ? routine.exercises : [];
+
+    let completedCount = 0;
+    exercises.forEach(ex => {
+      const exLog = (dayLog.exercises && dayLog.exercises[ex.id]) ? dayLog.exercises[ex.id] : { setsDone: [] };
+      const setsDone = Array.isArray(exLog.setsDone) ? exLog.setsDone : [];
+      if (setsDone.length >= (parseInt(ex.sets, 10) || 4)) completedCount++;
+    });
+
+    const isAllCompleted = completedCount === exercises.length && exercises.length > 0;
+
+    const banner = document.createElement('div');
+    banner.className = 'daily-workout-banner';
+    banner.innerHTML = `
+      <div class="daily-workout-banner-info">
+        <div class="daily-workout-banner-icon">🏋️</div>
+        <div>
+          <h3 class="daily-workout-banner-title">${dayOfWeek} • ${routine.name} (${routine.subtitle || ''})</h3>
+          <p class="daily-workout-banner-desc">
+            <span style="color: ${isAllCompleted ? 'var(--accent-emerald-light)' : '#fbbf24'}; font-weight: 700;">
+              ${completedCount}/${exercises.length} exercícios concluídos
+            </span> • ${routine.badge || 'Ficha do Dia'}
+          </p>
+        </div>
+      </div>
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <button type="button" class="btn-secondary" id="btn-daily-open-schedule">
+          ⚙️ Grade Semanal
+        </button>
+        <button type="button" class="btn-primary" id="btn-daily-open-full-gallery">
+          📂 Abrir no Modo Galeria
+        </button>
+      </div>
+    `;
+
+    banner.querySelector('#btn-daily-open-schedule').addEventListener('click', openWeeklyScheduleModal);
+    banner.querySelector('#btn-daily-open-full-gallery').addEventListener('click', () => {
+      activeRoutineId = routineKey;
+      const workoutTabBtn = document.querySelector('.nav-tab-btn[data-tab="tab-workout"]');
+      if (workoutTabBtn) workoutTabBtn.click();
+    });
+
+    dailyWorkoutPanel.appendChild(banner);
+
+    const cardsGrid = document.createElement('div');
+    cardsGrid.className = 'notion-gallery-grid';
+    dailyWorkoutPanel.appendChild(cardsGrid);
+
+    renderExerciseCardsTo(cardsGrid, routineKey, dateKey, exercises, dayLog, () => {
+      renderDailyWorkoutSubtab();
+      renderWorkoutTab();
+    });
+  }
+
+  // --- MODAL: Grade Semanal de Treinos (Configuração) ---
+  function openWeeklyScheduleModal() {
+    if (!modalWeeklySchedule || !scheduleDaysList) return;
+    const schedule = HabitStorage.getWeeklyWorkoutSchedule();
+    const routines = HabitStorage.getWorkoutRoutines();
+
+    scheduleDaysList.innerHTML = '';
+
+    WEEKDAY_ORDER.forEach(wDay => {
+      const currentVal = schedule[wDay] || 'REST';
+      const row = document.createElement('div');
+      row.className = 'schedule-day-row';
+
+      row.innerHTML = `
+        <div class="schedule-day-label">
+          <span class="schedule-day-abbr">${WEEKDAY_SHORT[wDay]}</span>
+          <span class="schedule-day-name">${WEEKDAY_NAMES[wDay]}</span>
+        </div>
+        <select class="form-select schedule-day-select" data-weekday="${wDay}">
+          <option value="A" ${currentVal === 'A' ? 'selected' : ''}>Treino A (${routines.A ? routines.A.subtitle : 'Peito, Ombro & Tríceps'})</option>
+          <option value="B" ${currentVal === 'B' ? 'selected' : ''}>Treino B (${routines.B ? routines.B.subtitle : 'Pernas & Fortalecimento'})</option>
+          <option value="C" ${currentVal === 'C' ? 'selected' : ''}>Treino C (${routines.C ? routines.C.subtitle : 'Costas & Bíceps'})</option>
+          <option value="D" ${currentVal === 'D' ? 'selected' : ''}>Treino D (${routines.D ? routines.D.subtitle : 'Ombros, Core & Mobilidade'})</option>
+          <option value="REST" ${currentVal === 'REST' ? 'selected' : ''}>🛋️ Descanso / Recuperação Ativa</option>
+        </select>
+      `;
+
+      scheduleDaysList.appendChild(row);
+    });
+
+    modalWeeklySchedule.classList.add('active');
+  }
+
+  function closeWeeklyScheduleModal() {
+    if (modalWeeklySchedule) modalWeeklySchedule.classList.remove('active');
+  }
+
+  if (btnOpenWeeklyScheduleModal) {
+    btnOpenWeeklyScheduleModal.addEventListener('click', openWeeklyScheduleModal);
+  }
+  if (btnCloseWeeklyScheduleModal) {
+    btnCloseWeeklyScheduleModal.addEventListener('click', closeWeeklyScheduleModal);
+  }
+  if (btnCancelWeeklySchedule) {
+    btnCancelWeeklySchedule.addEventListener('click', closeWeeklyScheduleModal);
+  }
+
+  if (formWeeklySchedule) {
+    formWeeklySchedule.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const selects = scheduleDaysList.querySelectorAll('.schedule-day-select');
+      const newSchedule = {};
+      selects.forEach(sel => {
+        newSchedule[sel.dataset.weekday] = sel.value;
+      });
+
+      HabitStorage.saveWeeklyWorkoutSchedule(newSchedule);
+      closeWeeklyScheduleModal();
+      renderWeeklyScheduleBar();
+      renderDailyWorkoutSubtab();
+      renderWorkoutTab();
+      updateHeroSection();
+      showToast('Grade semanal de treinos salva com sucesso!', '🗓️');
+    });
+  }
+
+  if (btnResetDefaultSchedule) {
+    btnResetDefaultSchedule.addEventListener('click', () => {
+      if (confirm('Deseja restaurar a grade semanal padrão (Seg A, Ter B, Qua Descanso, Qui C, Sex D, Sáb/Dom Descanso)?')) {
+        HabitStorage.resetWeeklyWorkoutSchedule();
+        openWeeklyScheduleModal();
+        renderWeeklyScheduleBar();
+        renderDailyWorkoutSubtab();
+        renderWorkoutTab();
+        showToast('Grade semanal restaurada para o padrão!', '↺');
+      }
+    });
   }
 
   function openNewExerciseModal() {
@@ -2096,6 +2392,8 @@ document.addEventListener('DOMContentLoaded', () => {
     renderDailyAlerts();
     renderJournal();
     renderFocusTab();
+    renderDailyWorkoutSubtab();
+    renderWeeklyScheduleBar();
 
     if (activeTab === 'tab-calendar') renderCalendarGrid();
     if (activeTab === 'tab-matrix') renderHeatmapMatrix();
@@ -2144,6 +2442,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (activeDailySubtab === 'subtab-alerts') renderDailyAlerts();
       if (activeDailySubtab === 'subtab-journal') renderJournal();
       if (activeDailySubtab === 'subtab-focus') renderFocusTab();
+      if (activeDailySubtab === 'subtab-workout') renderDailyWorkoutSubtab();
     });
   });
 

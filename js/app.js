@@ -114,6 +114,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const journalBookPage = document.getElementById('journal-book-page');
   const journalBookPageLabel = document.getElementById('journal-book-page-label');
   const journalBibleChapter = document.getElementById('journal-bible-chapter');
+  const journalBibleChapterLabel = document.getElementById('journal-bible-chapter-label');
+  const journalBibleNotes = document.getElementById('journal-bible-notes');
+  const journalBibleNotesLabel = document.getElementById('journal-bible-notes-label');
+  const btnClearBibleDay = document.getElementById('btn-clear-bible-day');
   const journalEntryText = document.getElementById('journal-entry-text');
   const journalSaveStatus = document.getElementById('journal-save-status');
   const bookCoverContainer = document.getElementById('book-cover-container');
@@ -922,7 +926,21 @@ document.addEventListener('DOMContentLoaded', () => {
     if (journalBookPageLabel) {
       journalBookPageLabel.textContent = `Página ou Capítulo do Dia ${selectedDay}`;
     }
+
+    if (journalBibleChapterLabel) {
+      journalBibleChapterLabel.textContent = `Capítulo ou Passagem do Dia ${selectedDay}`;
+    }
+    if (journalBibleNotesLabel) {
+      journalBibleNotesLabel.textContent = `Anotações, Versículo Marcante ou Reflexão do Dia ${selectedDay}`;
+    }
     if (journalBibleChapter) journalBibleChapter.value = journal.bibleChapter || '';
+    if (journalBibleNotes) journalBibleNotes.value = journal.bibleNotes || '';
+
+    if (btnClearBibleDay) {
+      const hasBible = !!(journal.bibleChapter && journal.bibleChapter.trim()) || !!(journal.bibleNotes && journal.bibleNotes.trim());
+      btnClearBibleDay.style.display = hasBible ? 'inline-block' : 'none';
+    }
+
     journalEntryText.value = journal.entry || '';
     currentDayBookCover = journal.bookCover || '';
 
@@ -954,8 +972,13 @@ document.addEventListener('DOMContentLoaded', () => {
         bookPage: journalBookPage.value.trim(),
         bookCover: currentDayBookCover,
         bibleChapter: journalBibleChapter ? journalBibleChapter.value.trim() : '',
+        bibleNotes: journalBibleNotes ? journalBibleNotes.value.trim() : '',
         entry: journalEntryText.value
       });
+      if (btnClearBibleDay) {
+        const hasBible = !!(journalBibleChapter && journalBibleChapter.value.trim()) || !!(journalBibleNotes && journalBibleNotes.value.trim());
+        btnClearBibleDay.style.display = hasBible ? 'inline-block' : 'none';
+      }
       setSaveStatus('✓ Salvo automaticamente', 'saved');
       if (activeTab === 'tab-calendar') renderCalendarGrid();
     }, 400);
@@ -1056,7 +1079,20 @@ document.addEventListener('DOMContentLoaded', () => {
   journalBookTitle.addEventListener('input', handleJournalInput);
   journalBookPage.addEventListener('input', handleJournalInput);
   if (journalBibleChapter) journalBibleChapter.addEventListener('input', handleJournalInput);
+  if (journalBibleNotes) journalBibleNotes.addEventListener('input', handleJournalInput);
   journalEntryText.addEventListener('input', handleJournalInput);
+
+  if (btnClearBibleDay) {
+    btnClearBibleDay.addEventListener('click', () => {
+      if (confirm(`Deseja limpar o registro da Bíblia do Dia ${selectedDay}?`)) {
+        if (journalBibleChapter) journalBibleChapter.value = '';
+        if (journalBibleNotes) journalBibleNotes.value = '';
+        handleJournalInput();
+        btnClearBibleDay.style.display = 'none';
+        showToast(`Registro da Bíblia do Dia ${selectedDay} removido.`, '🗑️');
+      }
+    });
+  }
 
   /* ==========================================================================
      Tab 1.5: Render Focus Sessions List

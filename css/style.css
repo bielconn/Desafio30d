@@ -1939,30 +1939,96 @@ body {
   transform: translateY(-2px);
 }
 
-.workout-day-schedule-pill.today {
-  border-color: var(--accent-emerald);
-  box-shadow: 0 0 14px rgba(16, 185, 129, 0.25);
+/* Dia Atual ("HOJE") quando NÃO selecionado: discreto e elegante, sem competir com a seleção */
+.workout-day-schedule-pill.is-today {
+  border-color: rgba(16, 185, 129, 0.35);
+  background: rgba(16, 185, 129, 0.04);
+}
+
+.workout-day-schedule-pill.is-today:hover {
+  border-color: rgba(16, 185, 129, 0.55);
   background: rgba(16, 185, 129, 0.08);
 }
 
-.workout-day-schedule-pill.active {
-  background: #232736;
-  border-color: #6366f1;
-  box-shadow: 0 0 12px rgba(99, 102, 241, 0.3);
-}
-
+/* Badge HOJE */
 .workout-day-schedule-pill .pill-today-badge {
   position: absolute;
   top: -8px;
-  background: var(--accent-emerald);
+  background: #059669;
   color: #ffffff;
   font-size: 0.6rem;
   font-weight: 800;
-  padding: 0.1rem 0.45rem;
+  padding: 0.12rem 0.5rem;
   border-radius: var(--radius-full);
   letter-spacing: 0.04em;
-  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.4);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  z-index: 2;
+  transition: var(--transition-fast);
 }
+
+/* Destaque ÚNICO e Certeiro do Card Selecionado */
+.workout-day-schedule-pill.selected {
+  transform: translateY(-3px);
+  z-index: 3;
+}
+
+.workout-day-schedule-pill.selected .pill-weekday-abbr {
+  color: #ffffff;
+  font-weight: 900;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+}
+
+/* Se for hoje E estiver selecionado, o badge ganha brilho especial */
+.workout-day-schedule-pill.is-today.selected .pill-today-badge {
+  background: var(--accent-emerald);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
+}
+
+/* Estilos de Destaque Único por Treino Selecionado */
+.workout-day-schedule-pill.selected.routine-A {
+  background: linear-gradient(180deg, rgba(59, 130, 246, 0.22) 0%, rgba(22, 27, 38, 0.95) 100%);
+  border: 2px solid #3b82f6;
+  box-shadow: 0 0 18px rgba(59, 130, 246, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.workout-day-schedule-pill.selected.routine-B {
+  background: linear-gradient(180deg, rgba(16, 185, 129, 0.22) 0%, rgba(22, 27, 38, 0.95) 100%);
+  border: 2px solid #10b981;
+  box-shadow: 0 0 18px rgba(16, 185, 129, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.workout-day-schedule-pill.selected.routine-C {
+  background: linear-gradient(180deg, rgba(168, 85, 247, 0.22) 0%, rgba(22, 27, 38, 0.95) 100%);
+  border: 2px solid #a855f7;
+  box-shadow: 0 0 18px rgba(168, 85, 247, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.workout-day-schedule-pill.selected.routine-D {
+  background: linear-gradient(180deg, rgba(245, 158, 11, 0.22) 0%, rgba(22, 27, 38, 0.95) 100%);
+  border: 2px solid #f59e0b;
+  box-shadow: 0 0 18px rgba(245, 158, 11, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.workout-day-schedule-pill.selected.routine-REST {
+  background: linear-gradient(180deg, rgba(148, 163, 184, 0.18) 0%, rgba(22, 27, 38, 0.95) 100%);
+  border: 2px solid #94a3b8;
+  box-shadow: 0 0 14px rgba(148, 163, 184, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+/* Indicador de foco na base do card selecionado */
+.workout-day-schedule-pill.selected::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  width: 22px;
+  height: 3px;
+  border-radius: 999px;
+}
+.workout-day-schedule-pill.selected.routine-A::after { background: #3b82f6; box-shadow: 0 0 8px #3b82f6; }
+.workout-day-schedule-pill.selected.routine-B::after { background: #10b981; box-shadow: 0 0 8px #10b981; }
+.workout-day-schedule-pill.selected.routine-C::after { background: #a855f7; box-shadow: 0 0 8px #a855f7; }
+.workout-day-schedule-pill.selected.routine-D::after { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
+.workout-day-schedule-pill.selected.routine-REST::after { background: #94a3b8; box-shadow: 0 0 8px #94a3b8; }
 
 .pill-weekday-abbr {
   font-family: 'Outfit', sans-serif;
@@ -2176,6 +2242,46 @@ body {
   border-color: var(--accent-emerald);
   color: #ffffff;
   box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
+}
+
+.notion-tab-btn[data-routine="A"].active {
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.14);
+  color: #ffffff;
+  box-shadow: 0 0 14px rgba(59, 130, 246, 0.3);
+}
+.notion-tab-btn[data-routine="A"].active .notion-grid-icon {
+  color: #93c5fd;
+}
+
+.notion-tab-btn[data-routine="B"].active {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.14);
+  color: #ffffff;
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.3);
+}
+.notion-tab-btn[data-routine="B"].active .notion-grid-icon {
+  color: #6ee7b7;
+}
+
+.notion-tab-btn[data-routine="C"].active {
+  border-color: #a855f7;
+  background: rgba(168, 85, 247, 0.14);
+  color: #ffffff;
+  box-shadow: 0 0 14px rgba(168, 85, 247, 0.3);
+}
+.notion-tab-btn[data-routine="C"].active .notion-grid-icon {
+  color: #d8b4fe;
+}
+
+.notion-tab-btn[data-routine="D"].active {
+  border-color: #f59e0b;
+  background: rgba(245, 158, 11, 0.14);
+  color: #ffffff;
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.3);
+}
+.notion-tab-btn[data-routine="D"].active .notion-grid-icon {
+  color: #fcd34d;
 }
 
 .notion-grid-icon {

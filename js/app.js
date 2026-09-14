@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Workout State (Notion Gallery)
   let activeRoutineId = 'A'; // 'A', 'B', 'C', 'D'
+  let selectedScheduleWeekday = null; // 0-6 (Seg=1, Ter=2, Qua=3, Qui=4, Sex=5, Sáb=6, Dom=0)
   let workoutRestInterval = null;
   let workoutRestSecondsLeft = 60;
   let workoutRestTargetSeconds = 60;
@@ -40,6 +41,22 @@ document.addEventListener('DOMContentLoaded', () => {
   } else {
     selectedDay = 1;
     viewingModalDay = 1;
+  }
+
+  // Inicializa a rotina e o dia selecionado na Grade Semanal de Treinos com base no dia de hoje
+  try {
+    const initDate = new Date(CURRENT_YEAR, CURRENT_MONTH - 1, selectedDay);
+    const initWeekday = initDate.getDay();
+    selectedScheduleWeekday = initWeekday;
+    const initialSchedule = HabitStorage.getWeeklyWorkoutSchedule();
+    if (initialSchedule && initialSchedule[initWeekday] && initialSchedule[initWeekday] !== 'REST') {
+      activeRoutineId = initialSchedule[initWeekday];
+    } else {
+      activeRoutineId = 'A';
+    }
+  } catch (e) {
+    selectedScheduleWeekday = 1;
+    activeRoutineId = 'A';
   }
 
   // Motivational Quotes
@@ -1810,15 +1827,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const dateObj = new Date(CURRENT_YEAR, CURRENT_MONTH - 1, selectedDay);
     const todayWeekday = dateObj.getDay(); // 0 a 6
 
+    if (selectedScheduleWeekday === null || selectedScheduleWeekday === undefined) {
+      selectedScheduleWeekday = todayWeekday;
+    }
+
     workoutWeeklyDaysGrid.innerHTML = '';
 
     WEEKDAY_ORDER.forEach(wDay => {
       const routineKey = schedule[wDay] || 'REST';
       const isToday = (wDay === todayWeekday);
-      const isRoutineActive = (activeRoutineId === routineKey);
+      const isSelected = (wDay === selectedScheduleWeekday);
 
       const pill = document.createElement('div');
-      pill.className = `workout-day-schedule-pill ${isToday ? 'today' : ''} ${isRoutineActive ? 'active' : ''}`;
+      pill.className = `workout-day-schedule-pill routine-${routineKey} ${isToday ? 'is-today' : ''} ${isSelected ? 'selected' : ''}`;
       pill.dataset.weekday = wDay;
       pill.dataset.routine = routineKey;
 
@@ -1831,13 +1852,14 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
 
       pill.addEventListener('click', () => {
+        selectedScheduleWeekday = wDay;
         if (routineKey !== 'REST') {
           activeRoutineId = routineKey;
           renderWorkoutTab();
         } else {
-          showToast(`Hoje é dia de Descanso programado para ${WEEKDAY_NAMES[wDay]}. Você pode escolher qualquer treino (A, B, C, D) se quiser treinar!`, '🛋️');
+          showToast(`Dia de Descanso programado para ${WEEKDAY_NAMES[wDay]}. Você pode clicar nas abas abaixo (A, B, C, D) se quiser treinar qualquer ficha!`, '🛋️');
+          renderWeeklyScheduleBar();
         }
-        renderWeeklyScheduleBar();
       });
 
       workoutWeeklyDaysGrid.appendChild(pill);
@@ -3176,6 +3198,15 @@ document.addEventListener('DOMContentLoaded', () => {
       notionTabs.forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
       activeRoutineId = tab.dataset.routine;
+
+      // Sincroniza a Grade Semanal para focar no dia correspondente à ficha escolhida
+      const schedule = HabitStorage.getWeeklyWorkoutSchedule();
+      if (schedule && schedule[selectedScheduleWeekday] !== activeRoutineId) {
+        const matchingDay = WEEKDAY_ORDER.find(d => schedule[d] === activeRoutineId);
+        if (matchingDay !== undefined) {
+          selectedScheduleWeekday = matchingDay;
+        }
+      }
       renderWorkoutTab();
     });
   });
@@ -3492,6 +3523,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderAllViews() {
+    const dateObj = new Date(CURRENT_YEAR, CURRENT_MONTH - 1, selectedDay);
+    selectedScheduleWeekday = dateObj.getDay();
+    const scheduledRoutine = HabitStorage.getRoutineForDay(CURRENT_YEAR, CURRENT_MONTH, selectedDay);
+    if (scheduledRoutine && scheduledRoutine !== 'REST') {
+      activeRoutineId = scheduledRoutine;
+    }
+
     updateHeroSection();
     renderChecklist();
     renderTasks();

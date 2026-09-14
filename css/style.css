@@ -1111,6 +1111,13 @@ body {
   box-shadow: var(--shadow-sm);
 }
 
+#journal-bible-notes {
+  resize: vertical;
+  min-height: 58px;
+  line-height: 1.5;
+  font-family: inherit;
+}
+
 .journal-card-header {
   display: flex;
   align-items: center;

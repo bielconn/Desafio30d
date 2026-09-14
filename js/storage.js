@@ -756,7 +756,6 @@ const HabitStorage = (() => {
   function getDayJournal(dateKey) {
     const all = getAllJournals();
     const activeBook = getActiveBook();
-    const activeBible = getActiveBible();
     const dayData = all[dateKey] || {};
 
     // Se o dia não tem livro preenchido explicitamente, herda o livro ativo salvo
@@ -766,10 +765,9 @@ const HabitStorage = (() => {
 
     const bookCover = dayData.bookCover || activeBook.coverUrl || '';
 
-    // Herda o capítulo da Bíblia ativo se o dia não tiver um registrado
-    const bibleChapter = (dayData.bibleChapter !== undefined && dayData.bibleChapter !== '')
-      ? dayData.bibleChapter
-      : activeBible.chapter || '';
+    // Bíblia: o registro de leitura e anotações é ESTRITAMENTE DIÁRIO (não vaza para outros dias)
+    const bibleChapter = (dayData.bibleChapter !== undefined) ? dayData.bibleChapter : '';
+    const bibleNotes = (dayData.bibleNotes !== undefined) ? dayData.bibleNotes : '';
 
     return {
       entry: dayData.entry || '',
@@ -777,6 +775,7 @@ const HabitStorage = (() => {
       bookPage: dayData.bookPage || '',
       bookCover: bookCover || '',
       bibleChapter: bibleChapter || '',
+      bibleNotes: bibleNotes || '',
       updatedAt: dayData.updatedAt || null
     };
   }
@@ -789,6 +788,7 @@ const HabitStorage = (() => {
       bookPage: journalData.bookPage || '',
       bookCover: journalData.bookCover || '',
       bibleChapter: journalData.bibleChapter !== undefined ? journalData.bibleChapter : '',
+      bibleNotes: journalData.bibleNotes !== undefined ? journalData.bibleNotes : '',
       updatedAt: new Date().toISOString()
     };
     saveAllJournals(all);
@@ -799,11 +799,6 @@ const HabitStorage = (() => {
         title: journalData.bookTitle || '',
         coverUrl: journalData.bookCover || ''
       });
-    }
-
-    // Se informou um capítulo da Bíblia, atualiza o livro bíblico ativo
-    if (journalData.bibleChapter !== undefined) {
-      saveActiveBible({ chapter: journalData.bibleChapter || '' });
     }
 
     return all[dateKey];
@@ -818,7 +813,10 @@ const HabitStorage = (() => {
 
     const hasTasks = tasks.length > 0;
     const hasPendingTasks = tasks.some(t => !t.done);
-    const hasJournal = !!(journal.entry && journal.entry.trim().length > 0) || !!(journal.bookPage && journal.bookPage.trim().length > 0);
+    const hasJournal = !!(journal.entry && journal.entry.trim().length > 0) || 
+                       !!(journal.bookPage && journal.bookPage.trim().length > 0) ||
+                       !!(journal.bibleChapter && journal.bibleChapter.trim().length > 0) ||
+                       !!(journal.bibleNotes && journal.bibleNotes.trim().length > 0);
     const hasFocus = focus.totalMinutes > 0;
     const hasAlerts = alerts.length > 0;
     

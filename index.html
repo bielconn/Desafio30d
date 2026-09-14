@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Desafio 30 Dias de Setembro | Habit Tracker & Calendário</title>
   <meta name="description" content="Acompanhe seus 30 hábitos durante os 30 dias de setembro. Calendário interativo, checklist diário, matriz de calor, timer pomodoro, diário de bordo com capa de livro e alertas prioritários.">
-  <link rel="stylesheet" href="css/style.css?v=4.2">
+  <link rel="stylesheet" href="css/style.css?v=4.3">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="icon" type="image/png" sizes="64x64" href="icon-64.png">
   <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
@@ -357,7 +357,7 @@
             </div>
           </div>
 
-          <!-- Bible Reading Section (Persistent) -->
+          <!-- Bible Reading Section (Diária por Dia) -->
           <div class="journal-reading-card" style="margin-top: 1rem;">
             <div class="journal-card-header" style="justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
               <div style="display: flex; align-items: center; gap: 0.75rem;">
@@ -365,20 +365,32 @@
                 <div>
                   <h4 style="font-size: 1.05rem; font-weight: 800; color: #ffffff;">Leitura da Bíblia</h4>
                   <p style="font-size: 0.8rem; color: var(--text-muted);">
-                    Registre o capítulo de hoje. Salvo automaticamente para os próximos dias.
+                    Registre o capítulo lido e suas reflexões deste dia.
                   </p>
                 </div>
               </div>
-              <span class="save-status-pill" id="bible-saved-indicator">📖 Bíblia Ativa</span>
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <button type="button" class="btn-clear-inline" id="btn-clear-bible-day" style="background: rgba(244,63,94,0.12); border: 1px solid rgba(244,63,94,0.25); color: var(--accent-rose); font-size: 0.72rem; font-weight: 700; border-radius: 4px; padding: 0.2rem 0.5rem; cursor: pointer; display: none;" title="Limpar leitura deste dia">
+                  🗑️ Limpar Dia
+                </button>
+                <span class="save-status-pill" id="bible-saved-indicator">✓ Registro Diário</span>
+              </div>
             </div>
 
-            <div class="form-group" style="margin-top: 0.75rem; margin-bottom: 0;">
-              <label class="form-label" for="journal-bible-chapter">
-                Capítulo ou Passagem do Dia
-                <span style="font-size: 0.75rem; color: var(--accent-emerald-light); font-weight: normal;">(Salvo automaticamente)</span>
+            <div class="form-group" style="margin-top: 0.75rem; margin-bottom: 0.75rem;">
+              <label class="form-label" for="journal-bible-chapter" id="journal-bible-chapter-label">
+                Capítulo ou Passagem do Dia 1
               </label>
               <input type="text" id="journal-bible-chapter" class="form-input"
-                placeholder="Ex: Salmos 23, João 3:16, Provérbios 4, Mateus 5...">
+                placeholder="Ex: Atos 4, Salmos 23, Provérbios 3...">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" for="journal-bible-notes" id="journal-bible-notes-label">
+                Anotações, Versículo Marcante ou Reflexão do Dia 1
+              </label>
+              <textarea id="journal-bible-notes" class="form-input" rows="2"
+                placeholder="Ex: Versículo marcante, aprendizado da leitura ou reflexão de hoje..."></textarea>
             </div>
           </div>
 
@@ -1233,9 +1245,9 @@
   <div class="toast-container" id="toast-container"></div>
 
   <!-- Scripts -->
-  <script src="js/workouts-data.js?v=4.2"></script>
-  <script src="js/confetti.js?v=4.2"></script>
-  <script src="js/storage.js?v=4.2"></script>
-  <script src="js/app.js?v=4.2"></script>
+  <script src="js/workouts-data.js?v=4.3"></script>
+  <script src="js/confetti.js?v=4.3"></script>
+  <script src="js/storage.js?v=4.3"></script>
+  <script src="js/app.js?v=4.3"></script>
 </body>
 </html>

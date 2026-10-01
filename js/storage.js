@@ -643,11 +643,13 @@ const HabitStorage = (() => {
 
   function addAlert(alertData) {
     const all = getAllAlerts();
+    const year = alertData.year || 2026;
+    const month = alertData.month || 10;
     const newAlert = {
       id: 'alert_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
       title: alertData.title.trim(),
       day: alertData.day ? parseInt(alertData.day, 10) : null,
-      dateKey: alertData.dateKey || (alertData.day ? formatDateKey(2026, 9, alertData.day) : null),
+      dateKey: alertData.dateKey || (alertData.day ? formatDateKey(year, month, alertData.day) : null),
       time: alertData.time || '',
       category: alertData.category || 'Urgente',
       icon: alertData.icon || '🚨',

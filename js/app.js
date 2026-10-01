@@ -1,8 +1,8 @@
-// Main Application Logic for Desafio 30 Dias de Setembro
+// Main Application Logic for Desafio 31 Dias de Outubro
 document.addEventListener('DOMContentLoaded', () => {
   const CURRENT_YEAR = 2026;
-  const CURRENT_MONTH = 9; // September
-  const TOTAL_DAYS = 30;
+  const CURRENT_MONTH = 10; // October
+  const TOTAL_DAYS = 31;
 
   // App State
   let selectedDay = 1;
@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let pomodoroIsRunning = false;
   let pomodoroCurrentHabit = null; // { id, title, emoji }
 
-  // Determine today in September if applicable
+  // Determine today in October if applicable
   const now = new Date();
   let todayDay = null;
   if (now.getMonth() + 1 === CURRENT_MONTH && now.getFullYear() === CURRENT_YEAR) {
@@ -156,9 +156,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const statPerfectDays = document.getElementById('stat-perfect-days');
   const statTotalChecks = document.getElementById('stat-total-checks');
 
-  // Modals - Pomodoro
+  // Modals - Pomodoro & Focus
   const pomodoroModal = document.getElementById('pomodoro-modal');
   const btnClosePomodoroModal = document.getElementById('btn-close-pomodoro-modal');
+  const pomodoroTabTimerBtn = document.getElementById('pomodoro-tab-timer-btn');
+  const pomodoroTabManualBtn = document.getElementById('pomodoro-tab-manual-btn');
+  const pomodoroTimerView = document.getElementById('pomodoro-timer-view');
+  const pomodoroManualView = document.getElementById('pomodoro-manual-view');
   const pomodoroActiveHabitName = document.getElementById('pomodoro-active-habit-name');
   const pomodoroTimerDigits = document.getElementById('pomodoro-timer-digits');
   const pomodoroStatusBadge = document.getElementById('pomodoro-status-badge');
@@ -169,6 +173,22 @@ document.addEventListener('DOMContentLoaded', () => {
   const pomodoroAutoCheck = document.getElementById('pomodoro-auto-check');
   const pomodoroPresetsBar = document.getElementById('pomodoro-presets-bar');
   const pomodoroPresetButtons = document.querySelectorAll('.pomodoro-presets .preset-btn');
+  const btnOpenManualFocus = document.getElementById('btn-open-manual-focus');
+
+  // Manual Focus Form Elements
+  const manualFocusDayInfo = document.getElementById('manual-focus-day-info');
+  const manualFocusHabitSelect = document.getElementById('manual-focus-habit-select');
+  const manualFocusCustomTitleGroup = document.getElementById('manual-focus-custom-title-group');
+  const manualFocusCustomTitle = document.getElementById('manual-focus-custom-title');
+  const manualPresetButtons = document.querySelectorAll('#manual-presets-bar .manual-preset-btn');
+  const manualFocusHours = document.getElementById('manual-focus-hours');
+  const manualFocusMinutes = document.getElementById('manual-focus-minutes');
+  const manualFocusTotalText = document.getElementById('manual-focus-total-text');
+  const manualFocusAutoCheck = document.getElementById('manual-focus-auto-check');
+  const manualFocusAutocheckLabel = document.getElementById('manual-focus-autocheck-label');
+  const manualFocusAutocheckWrapper = document.getElementById('manual-focus-autocheck-wrapper');
+  const manualFocusNotes = document.getElementById('manual-focus-notes');
+  const btnSaveManualFocus = document.getElementById('btn-save-manual-focus');
 
   // Modals - Day View & Timeline
   const dayViewModal = document.getElementById('day-view-modal');
@@ -396,7 +416,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const dateObj = new Date(CURRENT_YEAR, CURRENT_MONTH - 1, selectedDay);
     const dayOfWeek = WEEKDAY_NAMES[dateObj.getDay()];
     
-    currentDateText.textContent = `Dia ${selectedDay} de Setembro (${dayOfWeek})`;
+    currentDateText.textContent = `Dia ${selectedDay} de Outubro (${dayOfWeek})`;
     heroQuote.textContent = QUOTES[(selectedDay - 1) % QUOTES.length];
 
     const progress = HabitStorage.getDayProgress(CURRENT_YEAR, CURRENT_MONTH, selectedDay);
@@ -574,8 +594,8 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
         <div class="habit-right-actions">
           ${pomodoroBtnHtml}
-          <div class="habit-streak-badge" title="${habitStats.completedDays} dias concluídos em Setembro">
-            🔥 ${habitStats.completedDays}/30d
+          <div class="habit-streak-badge" title="${habitStats.completedDays} dias concluídos em Outubro">
+            🔥 ${habitStats.completedDays}/${TOTAL_DAYS}d
           </div>
         </div>
       `;
@@ -880,8 +900,8 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
     } else {
       alertDaySelectorGroup.innerHTML = `
-        <label class="form-label" for="alert-input-day" id="alert-day-label">Dia de Setembro (1 a 30)</label>
-        <input type="number" id="alert-input-day" class="form-input" min="1" max="30" value="${selectedDay}">
+        <label class="form-label" for="alert-input-day" id="alert-day-label">Dia de Outubro (1 a 31)</label>
+        <input type="number" id="alert-input-day" class="form-input" min="1" max="31" value="${selectedDay}">
       `;
     }
   });
@@ -1114,6 +1134,16 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ==========================================================================
      Tab 1.5: Render Focus Sessions List
      ========================================================================== */
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
   function renderFocusTab() {
     const dateKey = HabitStorage.formatDateKey(CURRENT_YEAR, CURRENT_MONTH, selectedDay);
     const focus = HabitStorage.getDayFocus(dateKey);
@@ -1125,7 +1155,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div style="text-align: center; padding: 2.5rem 1rem; color: var(--text-muted); border: 1px dashed var(--border-color); border-radius: var(--radius-md);">
           <div style="font-size: 2rem; margin-bottom: 0.5rem;">⏱️</div>
           <div style="font-weight: 700; color: var(--text-main);">Nenhuma sessão de foco registrada no Dia ${selectedDay}</div>
-          <div style="font-size: 0.82rem; margin-top: 0.25rem;">Inicie um timer Pomodoro no topo ou ao lado de qualquer hábito de foco!</div>
+          <div style="font-size: 0.82rem; margin-top: 0.25rem;">Inicie um timer Pomodoro no topo ou registre manualmente o tempo que você se dedicou!</div>
         </div>
       `;
       return;
@@ -1135,30 +1165,127 @@ document.addEventListener('DOMContentLoaded', () => {
       const timeStr = new Date(s.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       const item = document.createElement('div');
       item.className = 'focus-session-item';
+      const isManual = !!s.isManual;
+      const typeBadge = isManual
+        ? `<span class="focus-badge-tag manual">✍️ Manual</span>`
+        : `<span class="focus-badge-tag timer">⏱️ Timer</span>`;
+      const notesHtml = s.notes ? `<div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 0.2rem; font-style: italic;">📝 "${escapeHtml(s.notes)}"</div>` : '';
+
       item.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 0.75rem;">
-          <span style="font-weight: 800; color: #fbbf24; font-size: 1.1rem;">#${idx + 1}</span>
-          <div>
-            <div style="font-weight: 700; color: var(--text-main);">${s.habitTitle}</div>
-            <div style="font-size: 0.75rem; color: var(--text-muted);">Realizada às ${timeStr}</div>
+        <div style="display: flex; align-items: center; gap: 0.75rem; min-width: 0;">
+          <span style="font-weight: 800; color: #fbbf24; font-size: 1.1rem; flex-shrink: 0;">#${idx + 1}</span>
+          <div style="min-width: 0;">
+            <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
+              <span style="font-weight: 700; color: var(--text-main);">${escapeHtml(s.habitTitle)}</span>
+              ${typeBadge}
+            </div>
+            <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 0.15rem;">Realizada às ${timeStr}</div>
+            ${notesHtml}
           </div>
         </div>
-        <div style="font-family: 'Fira Code', monospace; font-weight: 700; color: var(--accent-emerald-light); font-size: 0.95rem;">
-          +${HabitStorage.formatMinutes(s.minutes)}
+        <div style="display: flex; align-items: center; gap: 0.6rem; flex-shrink: 0;">
+          <div style="font-family: 'Fira Code', monospace; font-weight: 700; color: var(--accent-emerald-light); font-size: 0.95rem;">
+            +${HabitStorage.formatMinutes(s.minutes)}
+          </div>
+          <button type="button" class="btn-delete-session" title="Excluir esta sessão de foco" aria-label="Excluir sessão">
+            🗑️
+          </button>
         </div>
       `;
+
+      item.querySelector('.btn-delete-session').addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (confirm(`Deseja remover esta sessão de ${HabitStorage.formatMinutes(s.minutes)} (${s.habitTitle})?`)) {
+          HabitStorage.deleteFocusSession(dateKey, s.id);
+          renderAllViews();
+          showToast('Sessão de foco removida.', '🗑️');
+        }
+      });
+
       dailyFocusSessionsList.appendChild(item);
     });
   }
 
   btnStartCustomPomodoro.addEventListener('click', () => {
-    openPomodoroModal(null);
+    openPomodoroModal(null, 'timer');
   });
 
+  if (btnOpenManualFocus) {
+    btnOpenManualFocus.addEventListener('click', () => {
+      openPomodoroModal(null, 'manual');
+    });
+  }
+
   /* ==========================================================================
-     Pomodoro Timer Logic (Continuous Focus / Overtime Support)
+     Pomodoro Timer & Manual Focus Logic
      ========================================================================== */
-  function openPomodoroModal(habit) {
+  function setPomodoroModalMode(mode) {
+    if (mode === 'manual') {
+      if (pomodoroTabTimerBtn) pomodoroTabTimerBtn.classList.remove('active');
+      if (pomodoroTabManualBtn) pomodoroTabManualBtn.classList.add('active');
+      if (pomodoroTimerView) pomodoroTimerView.style.display = 'none';
+      if (pomodoroManualView) pomodoroManualView.style.display = 'block';
+    } else {
+      if (pomodoroTabTimerBtn) pomodoroTabTimerBtn.classList.add('active');
+      if (pomodoroTabManualBtn) pomodoroTabManualBtn.classList.remove('active');
+      if (pomodoroTimerView) pomodoroTimerView.style.display = 'block';
+      if (pomodoroManualView) pomodoroManualView.style.display = 'none';
+    }
+  }
+
+  function updateManualFocusDayInfo() {
+    if (manualFocusDayInfo) {
+      manualFocusDayInfo.innerHTML = `📅 Registrando foco para o <strong>Dia ${selectedDay} de Outubro</strong>`;
+    }
+  }
+
+  function updateManualTotalPreview() {
+    const h = parseInt(manualFocusHours ? manualFocusHours.value : 0, 10) || 0;
+    const m = parseInt(manualFocusMinutes ? manualFocusMinutes.value : 0, 10) || 0;
+    const totalMinutes = Math.max(0, h * 60 + m);
+    if (manualFocusTotalText) {
+      manualFocusTotalText.textContent = totalMinutes > 0 ? HabitStorage.formatMinutes(totalMinutes) : '0m';
+    }
+  }
+
+  function populateManualHabitSelect(preselectedHabit = null) {
+    if (!manualFocusHabitSelect) return;
+    const habits = HabitStorage.getHabits();
+    manualFocusHabitSelect.innerHTML = '';
+
+    // First option: Custom / Free focus
+    const customOpt = document.createElement('option');
+    customOpt.value = 'custom';
+    customOpt.textContent = '🎯 Outra Atividade / Foco Livre...';
+    manualFocusHabitSelect.appendChild(customOpt);
+
+    // List of challenge habits
+    habits.forEach(h => {
+      const opt = document.createElement('option');
+      opt.value = h.id;
+      opt.textContent = `${h.emoji || '🎯'} ${h.title}`;
+      if (preselectedHabit && preselectedHabit.id === h.id) {
+        opt.selected = true;
+      }
+      manualFocusHabitSelect.appendChild(opt);
+    });
+
+    if (!preselectedHabit) {
+      customOpt.selected = true;
+      if (manualFocusCustomTitleGroup) manualFocusCustomTitleGroup.style.display = 'block';
+      if (manualFocusAutocheckWrapper) manualFocusAutocheckWrapper.style.display = 'none';
+    } else {
+      if (manualFocusCustomTitleGroup) manualFocusCustomTitleGroup.style.display = 'none';
+      if (manualFocusAutocheckWrapper) manualFocusAutocheckWrapper.style.display = 'block';
+      if (manualFocusAutocheckLabel) {
+        manualFocusAutocheckLabel.textContent = `Marcar "${preselectedHabit.title}" como concluído hoje`;
+      }
+    }
+  }
+
+  function openPomodoroModal(habit = null, initialMode = 'timer') {
+    setPomodoroModalMode(initialMode);
+
     if (!pomodoroIsRunning) {
       pomodoroCurrentHabit = habit;
       const minutes = habit && habit.defaultMinutes ? habit.defaultMinutes : 25;
@@ -1177,6 +1304,12 @@ document.addEventListener('DOMContentLoaded', () => {
       : 'Foco Geral';
 
     updatePomodoroDisplay();
+
+    // Prepare manual form
+    populateManualHabitSelect(habit);
+    updateManualFocusDayInfo();
+    updateManualTotalPreview();
+
     pomodoroModal.classList.add('active');
   }
 
@@ -1197,7 +1330,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnPomodoroFinish.textContent = '⏹️ Concluir';
       } else {
         headerTimerText.textContent = 'Pomodoro';
-        document.title = 'Desafio 30 Dias de Setembro | Habit Tracker & Calendário';
+        document.title = 'Desafio 31 Dias de Outubro | Habit Tracker & Calendário';
         btnPomodoroFinish.style.display = 'none';
       }
     } else {
@@ -1358,6 +1491,121 @@ document.addEventListener('DOMContentLoaded', () => {
     pomodoroModal.classList.remove('active');
   });
 
+  /* --------------------------------------------------------------------------
+     Manual Focus Submission & Controls
+     -------------------------------------------------------------------------- */
+  function saveManualFocusSession() {
+    const h = parseInt(manualFocusHours ? manualFocusHours.value : 0, 10) || 0;
+    const m = parseInt(manualFocusMinutes ? manualFocusMinutes.value : 0, 10) || 0;
+    const totalMinutes = h * 60 + m;
+
+    if (totalMinutes <= 0) {
+      showToast('Por favor, informe um tempo maior que 0 minutos.', '⚠️');
+      return;
+    }
+
+    const dateKey = HabitStorage.formatDateKey(CURRENT_YEAR, CURRENT_MONTH, selectedDay);
+    const selectedVal = manualFocusHabitSelect ? manualFocusHabitSelect.value : 'custom';
+    let habitId = null;
+    let habitTitle = '';
+    let habitObj = null;
+
+    if (selectedVal === 'custom') {
+      const customTitle = manualFocusCustomTitle ? manualFocusCustomTitle.value.trim() : '';
+      habitTitle = customTitle || 'Foco Livre';
+    } else {
+      const habits = HabitStorage.getHabits();
+      habitObj = habits.find(h => h.id === selectedVal);
+      if (habitObj) {
+        habitId = habitObj.id;
+        habitTitle = `${habitObj.emoji || '🎯'} ${habitObj.title}`;
+      } else {
+        habitTitle = 'Foco';
+      }
+    }
+
+    const notes = manualFocusNotes ? manualFocusNotes.value.trim() : '';
+
+    // Add focus session marked as manual
+    HabitStorage.addFocusSession(dateKey, habitId, totalMinutes, habitTitle, true, notes);
+
+    // Auto-check habit if checked
+    if (habitObj && manualFocusAutoCheck && manualFocusAutoCheck.checked) {
+      HabitStorage.setCheck(dateKey, habitObj.id, true, habitObj.targetCount || 1);
+    }
+
+    SoundFx.playVictory();
+    Confetti.launch(35);
+
+    if (manualFocusNotes) manualFocusNotes.value = '';
+    if (manualFocusCustomTitle) manualFocusCustomTitle.value = '';
+
+    pomodoroModal.classList.remove('active');
+    renderAllViews();
+
+    const formattedTime = HabitStorage.formatMinutes(totalMinutes);
+    showToast(`✍️ ${formattedTime} de foco registrados no Dia ${selectedDay}!`, '⭐');
+  }
+
+  if (pomodoroTabTimerBtn) {
+    pomodoroTabTimerBtn.addEventListener('click', () => setPomodoroModalMode('timer'));
+  }
+
+  if (pomodoroTabManualBtn) {
+    pomodoroTabManualBtn.addEventListener('click', () => setPomodoroModalMode('manual'));
+  }
+
+  if (manualFocusHabitSelect) {
+    manualFocusHabitSelect.addEventListener('change', () => {
+      const selectedVal = manualFocusHabitSelect.value;
+      if (selectedVal === 'custom') {
+        if (manualFocusCustomTitleGroup) manualFocusCustomTitleGroup.style.display = 'block';
+        if (manualFocusAutocheckWrapper) manualFocusAutocheckWrapper.style.display = 'none';
+      } else {
+        if (manualFocusCustomTitleGroup) manualFocusCustomTitleGroup.style.display = 'none';
+        if (manualFocusAutocheckWrapper) manualFocusAutocheckWrapper.style.display = 'block';
+        const habits = HabitStorage.getHabits();
+        const found = habits.find(h => h.id === selectedVal);
+        if (found && manualFocusAutocheckLabel) {
+          manualFocusAutocheckLabel.textContent = `Marcar "${found.title}" como concluído hoje`;
+        }
+      }
+    });
+  }
+
+  if (manualPresetButtons) {
+    manualPresetButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        manualPresetButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const mins = parseInt(btn.dataset.mins, 10) || 0;
+        const h = Math.floor(mins / 60);
+        const m = mins % 60;
+        if (manualFocusHours) manualFocusHours.value = h;
+        if (manualFocusMinutes) manualFocusMinutes.value = m;
+        updateManualTotalPreview();
+      });
+    });
+  }
+
+  if (manualFocusHours) {
+    manualFocusHours.addEventListener('input', () => {
+      manualPresetButtons.forEach(b => b.classList.remove('active'));
+      updateManualTotalPreview();
+    });
+  }
+
+  if (manualFocusMinutes) {
+    manualFocusMinutes.addEventListener('input', () => {
+      manualPresetButtons.forEach(b => b.classList.remove('active'));
+      updateManualTotalPreview();
+    });
+  }
+
+  if (btnSaveManualFocus) {
+    btnSaveManualFocus.addEventListener('click', saveManualFocusSession);
+  }
+
   /* ==========================================================================
      Tab 2: Render Calendar 30 Days (With Day Viewer Modal & Alert Badges)
      ========================================================================== */
@@ -1449,8 +1697,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const dateObj = new Date(CURRENT_YEAR, CURRENT_MONTH - 1, day);
     const dayOfWeek = WEEKDAY_NAMES[dateObj.getDay()];
     
-    dayViewTitle.textContent = `Dia ${day} de Setembro (${dayOfWeek})`;
-    dayViewBadge.textContent = (todayDay === day) ? 'HOJE' : `Dia ${day} dos 30d`;
+    dayViewTitle.textContent = `Dia ${day} de Outubro (${dayOfWeek})`;
+    dayViewBadge.textContent = (todayDay === day) ? 'HOJE' : `Dia ${day} dos ${TOTAL_DAYS}d`;
 
     const progress = HabitStorage.getDayProgress(CURRENT_YEAR, CURRENT_MONTH, day);
     const journal = HabitStorage.getDayJournal(dateKey);
@@ -1621,7 +1869,7 @@ document.addEventListener('DOMContentLoaded', () => {
         card.className = 'timeline-day-card';
         card.innerHTML = `
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
-            <div style="font-weight: 800; font-size: 1.1rem; color: #ffffff;">Dia ${day} de Setembro (${dayOfWeek})</div>
+            <div style="font-weight: 800; font-size: 1.1rem; color: #ffffff;">Dia ${day} de Outubro (${dayOfWeek})</div>
             <div style="display: flex; gap: 0.5rem; font-size: 0.78rem;">
               <span class="save-status-pill">⭐ ${progress.percentage}% Hábitos</span>
               ${focus.totalMinutes > 0 ? `<span class="save-status-pill" style="color:#fbbf24; border-color: rgba(245,158,11,0.3);">⏱️ ${HabitStorage.formatMinutes(focus.totalMinutes)} Foco</span>` : ''}
@@ -3441,7 +3689,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return `
         <div class="weight-session-item">
           <div class="weight-session-date-col">
-            <span class="weight-session-date">📅 ${dayName}, ${session.day.toString().padStart(2, '0')} de Setembro</span>
+            <span class="weight-session-date">📅 ${dayName}, ${session.day.toString().padStart(2, '0')} de Outubro</span>
             <span class="weight-session-sets">
               ${session.setsDone.length > 0 ? `✓ ${session.setsDone.length} séries marcadas` : 'Carga registrada'}
             </span>
@@ -3463,7 +3711,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="weight-chart-box">
         <div class="weight-chart-header">
           <span>📊 Curva de Progressão de Carga</span>
-          <span style="color: var(--accent-emerald-light); font-size: 0.75rem;">Setembro 2026</span>
+          <span style="color: var(--accent-emerald-light); font-size: 0.75rem;">Outubro 2026</span>
         </div>
         ${svgElements}
       </div>
@@ -3605,7 +3853,7 @@ document.addEventListener('DOMContentLoaded', () => {
       selectedDay--;
       renderAllViews();
     } else {
-      showToast('Você está no primeiro dia de Setembro.', 'ℹ️');
+      showToast('Você está no primeiro dia de Outubro.', 'ℹ️');
     }
   });
 
@@ -3614,7 +3862,7 @@ document.addEventListener('DOMContentLoaded', () => {
       selectedDay++;
       renderAllViews();
     } else {
-      showToast('Você está no último dia de Setembro.', 'ℹ️');
+      showToast('Você está no último dia de Outubro.', 'ℹ️');
     }
   });
 

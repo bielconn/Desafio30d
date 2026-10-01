@@ -1,4 +1,4 @@
-// Storage & Data Management for Desafio 30 Dias (Setembro)
+// Storage & Data Management for Desafio 31 Dias (Outubro)
 const HabitStorage = (() => {
   const HABITS_KEY = 'desafio30d_habits_v2';
   const HABITS_LEGACY_KEY = 'desafio30d_habits_v1';
@@ -55,7 +55,7 @@ const HabitStorage = (() => {
       id: 'alert_fisio_1',
       title: 'Consulta de Fisioterapia (Sessão 1/3)',
       day: 2,
-      dateKey: '2026-09-02',
+      dateKey: '2026-10-02',
       time: '15:00',
       category: 'Saúde',
       icon: '🏥',
@@ -67,7 +67,7 @@ const HabitStorage = (() => {
       id: 'alert_gemini_cancel',
       title: 'Cancelar plano Pro no Gemini (expira dia 5)',
       day: 4,
-      dateKey: '2026-09-04',
+      dateKey: '2026-10-04',
       time: '12:00',
       category: 'Financeiro',
       icon: '🚨',
@@ -79,7 +79,7 @@ const HabitStorage = (() => {
       id: 'alert_fisio_2',
       title: 'Consulta de Fisioterapia (Sessão 2/3)',
       day: 4,
-      dateKey: '2026-09-04',
+      dateKey: '2026-10-04',
       time: '15:00',
       category: 'Saúde',
       icon: '🏥',
@@ -91,7 +91,7 @@ const HabitStorage = (() => {
       id: 'alert_fisio_3',
       title: 'Consulta de Fisioterapia (Última Sessão 3/3)',
       day: 9,
-      dateKey: '2026-09-09',
+      dateKey: '2026-10-09',
       time: '15:00',
       category: 'Saúde',
       icon: '🏥',
@@ -110,7 +110,7 @@ const HabitStorage = (() => {
     { id: 'badge_100_checks', title: 'Centurião dos Hábitos', desc: 'Acumule 100 checks realizados', icon: '⚡', threshold: { type: 'total_checks', value: 100 } },
     { id: 'badge_halfway', title: 'Metade da Jornada', desc: '15 dias de dedicação concluídos', icon: '🎯', threshold: { type: 'active_days', value: 15 } },
     { id: 'badge_streak_21', title: 'Hábito Cristalizado', desc: '21 dias consecutivos de transformação', icon: '💎', threshold: { type: 'streak', value: 21 } },
-    { id: 'badge_master_30', title: 'Lenda de Setembro', desc: '30 dias do desafio conquistados!', icon: '👑', threshold: { type: 'active_days', value: 30 } }
+    { id: 'badge_master_30', title: 'Lenda de Outubro', desc: '31 dias do desafio conquistados!', icon: '👑', threshold: { type: 'active_days', value: 31 } }
   ];
 
   function formatDateKey(year, month, day) {
@@ -354,7 +354,7 @@ const HabitStorage = (() => {
     return all[dateKey] || { totalMinutes: 0, sessions: [] };
   }
 
-  function addFocusSession(dateKey, habitId, minutes, habitTitle = '') {
+  function addFocusSession(dateKey, habitId, minutes, habitTitle = '', isManual = false, notes = '') {
     const all = getAllFocusData();
     if (!all[dateKey]) {
       all[dateKey] = { totalMinutes: 0, sessions: [] };
@@ -364,11 +364,25 @@ const HabitStorage = (() => {
       habitId: habitId || null,
       habitTitle: habitTitle || 'Foco Livre',
       minutes: parseInt(minutes, 10) || 0,
+      isManual: !!isManual,
+      notes: notes || '',
       timestamp: new Date().toISOString()
     };
     all[dateKey].sessions.push(session);
-    all[dateKey].totalMinutes += session.minutes;
+    all[dateKey].totalMinutes = Math.max(0, (all[dateKey].totalMinutes || 0) + session.minutes);
     saveAllFocusData(all);
+    return all[dateKey];
+  }
+
+  function deleteFocusSession(dateKey, sessionId) {
+    const all = getAllFocusData();
+    if (!all[dateKey] || !all[dateKey].sessions) return;
+    const idx = all[dateKey].sessions.findIndex(s => s.id === sessionId);
+    if (idx !== -1) {
+      const removed = all[dateKey].sessions.splice(idx, 1)[0];
+      all[dateKey].totalMinutes = Math.max(0, (all[dateKey].totalMinutes || 0) - (removed.minutes || 0));
+      saveAllFocusData(all);
+    }
     return all[dateKey];
   }
 
@@ -382,12 +396,12 @@ const HabitStorage = (() => {
     return `${m}m`;
   }
 
-  function getSeptemberSummary(year = 2026) {
+  function getSeptemberSummary(year = 2026, month = 10, totalDays = 31) {
     const habits = getHabits();
     const totalHabits = habits.length;
     const allFocus = getAllFocusData();
     
-    let totalChecksPossible = totalHabits * 30;
+    let totalChecksPossible = totalHabits * totalDays;
     let totalChecksDone = 0;
     let perfectDays = 0;
     let activeDays = 0;
@@ -397,8 +411,8 @@ const HabitStorage = (() => {
 
     const daysData = [];
 
-    for (let day = 1; day <= 30; day++) {
-      const dateKey = formatDateKey(year, 9, day);
+    for (let day = 1; day <= totalDays; day++) {
+      const dateKey = formatDateKey(year, month, day);
       const dayFocus = allFocus[dateKey] || { totalMinutes: 0 };
       let completedInDay = 0;
 
@@ -457,7 +471,7 @@ const HabitStorage = (() => {
 
     return {
       year,
-      month: 9,
+      month,
       totalHabits,
       totalChecksDone,
       totalChecksPossible,
@@ -472,21 +486,21 @@ const HabitStorage = (() => {
     };
   }
 
-  function getHabitStats(habitId, year = 2026) {
+  function getHabitStats(habitId, year = 2026, month = 10, totalDays = 31) {
     const habits = getHabits();
     const habit = habits.find(h => h.id === habitId);
     const target = habit ? (habit.targetCount || 1) : 1;
 
     let completedDays = 0;
-    for (let day = 1; day <= 30; day++) {
-      const dateKey = formatDateKey(year, 9, day);
+    for (let day = 1; day <= totalDays; day++) {
+      const dateKey = formatDateKey(year, month, day);
       if (isHabitChecked(dateKey, habitId, target)) {
         completedDays++;
       }
     }
     return {
       completedDays,
-      percentage: Math.round((completedDays / 30) * 100)
+      percentage: Math.round((completedDays / totalDays) * 100)
     };
   }
 
@@ -1187,7 +1201,7 @@ const HabitStorage = (() => {
     const exportData = {
       version: '3.7',
       exportedAt: new Date().toISOString(),
-      appName: 'Desafio 30 Dias de Setembro',
+      appName: 'Desafio 31 Dias de Outubro',
       habits: getHabits(),
       checks: getAllChecks(),
       tasks: getAllTasksRaw(),
@@ -1291,6 +1305,7 @@ const HabitStorage = (() => {
     // Focus & Pomodoro
     getDayFocus,
     addFocusSession,
+    deleteFocusSession,
     formatMinutes,
     // Tasks with Rollover
     getDayTasks,

@@ -1,8 +1,19 @@
-// Main Application Logic for Desafio 31 Dias de Outubro
+// Main Application Logic for Desafio 30 Dias (Navegação Multimeses)
 document.addEventListener('DOMContentLoaded', () => {
-  const CURRENT_YEAR = 2026;
-  const CURRENT_MONTH = 10; // October
-  const TOTAL_DAYS = 31;
+  const MONTH_NAMES = [
+    '', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+  ];
+
+  function getDaysInMonth(year, month) {
+    return new Date(year, month, 0).getDate();
+  }
+
+  // App State - Data Multimeses
+  const initialNow = new Date();
+  let CURRENT_YEAR = initialNow.getFullYear();
+  let CURRENT_MONTH = initialNow.getMonth() + 1;
+  let TOTAL_DAYS = getDaysInMonth(CURRENT_YEAR, CURRENT_MONTH);
 
   // App State
   let selectedDay = 1;
@@ -31,11 +42,10 @@ document.addEventListener('DOMContentLoaded', () => {
   let pomodoroIsRunning = false;
   let pomodoroCurrentHabit = null; // { id, title, emoji }
 
-  // Determine today in October if applicable
-  const now = new Date();
+  // Determine today if applicable
   let todayDay = null;
-  if (now.getMonth() + 1 === CURRENT_MONTH && now.getFullYear() === CURRENT_YEAR) {
-    todayDay = Math.min(Math.max(now.getDate(), 1), TOTAL_DAYS);
+  if (initialNow.getMonth() + 1 === CURRENT_MONTH && initialNow.getFullYear() === CURRENT_YEAR) {
+    todayDay = Math.min(Math.max(initialNow.getDate(), 1), TOTAL_DAYS);
     selectedDay = todayDay;
     viewingModalDay = todayDay;
   } else {
@@ -83,6 +93,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const toastContainer = document.getElementById('toast-container');
   const headerTimerText = document.getElementById('header-timer-text');
   const btnHeaderPomodoro = document.getElementById('btn-header-pomodoro');
+
+  // Month Selector Elements
+  const headerMonthYearSelect = document.getElementById('header-month-year-select');
+  const btnPrevMonth = document.getElementById('btn-prev-month');
+  const btnNextMonth = document.getElementById('btn-next-month');
+  const calendarSectionTitle = document.getElementById('calendar-section-title');
+  const matrixSectionTitle = document.getElementById('matrix-section-title');
 
   // Priority Banner DOM
   const priorityAlertsBanner = document.getElementById('priority-alerts-banner');
@@ -416,11 +433,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const dateObj = new Date(CURRENT_YEAR, CURRENT_MONTH - 1, selectedDay);
     const dayOfWeek = WEEKDAY_NAMES[dateObj.getDay()];
     
-    currentDateText.textContent = `Dia ${selectedDay} de Outubro (${dayOfWeek})`;
+    currentDateText.textContent = `Dia ${selectedDay} de ${MONTH_NAMES[CURRENT_MONTH]} (${dayOfWeek})`;
     heroQuote.textContent = QUOTES[(selectedDay - 1) % QUOTES.length];
 
     const progress = HabitStorage.getDayProgress(CURRENT_YEAR, CURRENT_MONTH, selectedDay);
-    const summary = HabitStorage.getSeptemberSummary(CURRENT_YEAR);
+    const summary = HabitStorage.getSeptemberSummary(CURRENT_YEAR, CURRENT_MONTH, TOTAL_DAYS);
     const tasks = HabitStorage.getDayTasks(dateKey);
     const pendingTasks = tasks.filter(t => !t.done).length;
     const completedTasks = tasks.filter(t => t.done).length;
@@ -594,7 +611,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
         <div class="habit-right-actions">
           ${pomodoroBtnHtml}
-          <div class="habit-streak-badge" title="${habitStats.completedDays} dias concluídos em Outubro">
+          <div class="habit-streak-badge" title="${habitStats.completedDays} dias concluídos em ${MONTH_NAMES[CURRENT_MONTH]}">
             🔥 ${habitStats.completedDays}/${TOTAL_DAYS}d
           </div>
         </div>
@@ -900,8 +917,8 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
     } else {
       alertDaySelectorGroup.innerHTML = `
-        <label class="form-label" for="alert-input-day" id="alert-day-label">Dia de Outubro (1 a 31)</label>
-        <input type="number" id="alert-input-day" class="form-input" min="1" max="31" value="${selectedDay}">
+        <label class="form-label" for="alert-input-day" id="alert-day-label">Dia de ${MONTH_NAMES[CURRENT_MONTH]} (1 a ${TOTAL_DAYS})</label>
+        <input type="number" id="alert-input-day" class="form-input" min="1" max="${TOTAL_DAYS}" value="${selectedDay}">
       `;
     }
   });
@@ -1235,7 +1252,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function updateManualFocusDayInfo() {
     if (manualFocusDayInfo) {
-      manualFocusDayInfo.innerHTML = `📅 Registrando foco para o <strong>Dia ${selectedDay} de Outubro</strong>`;
+      manualFocusDayInfo.innerHTML = `📅 Registrando foco para o <strong>Dia ${selectedDay} de ${MONTH_NAMES[CURRENT_MONTH]}</strong>`;
     }
   }
 
@@ -1330,7 +1347,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnPomodoroFinish.textContent = '⏹️ Concluir';
       } else {
         headerTimerText.textContent = 'Pomodoro';
-        document.title = 'Desafio 31 Dias de Outubro | Habit Tracker & Calendário';
+        document.title = `Desafio 30 Dias (${MONTH_NAMES[CURRENT_MONTH]} ${CURRENT_YEAR})`;
         btnPomodoroFinish.style.display = 'none';
       }
     } else {
@@ -1610,6 +1627,9 @@ document.addEventListener('DOMContentLoaded', () => {
      Tab 2: Render Calendar 30 Days (With Day Viewer Modal & Alert Badges)
      ========================================================================== */
   function renderCalendarGrid() {
+    if (calendarSectionTitle) {
+      calendarSectionTitle.textContent = `📅 ${MONTH_NAMES[CURRENT_MONTH]} de ${CURRENT_YEAR} (${TOTAL_DAYS} Dias)`;
+    }
     calendarDaysContainer.innerHTML = '';
     const habits = HabitStorage.getHabits();
     const totalHabits = habits.length;
@@ -1697,7 +1717,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const dateObj = new Date(CURRENT_YEAR, CURRENT_MONTH - 1, day);
     const dayOfWeek = WEEKDAY_NAMES[dateObj.getDay()];
     
-    dayViewTitle.textContent = `Dia ${day} de Outubro (${dayOfWeek})`;
+    dayViewTitle.textContent = `Dia ${day} de ${MONTH_NAMES[CURRENT_MONTH]} (${dayOfWeek})`;
     dayViewBadge.textContent = (todayDay === day) ? 'HOJE' : `Dia ${day} dos ${TOTAL_DAYS}d`;
 
     const progress = HabitStorage.getDayProgress(CURRENT_YEAR, CURRENT_MONTH, day);
@@ -1869,7 +1889,7 @@ document.addEventListener('DOMContentLoaded', () => {
         card.className = 'timeline-day-card';
         card.innerHTML = `
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
-            <div style="font-weight: 800; font-size: 1.1rem; color: #ffffff;">Dia ${day} de Outubro (${dayOfWeek})</div>
+            <div style="font-weight: 800; font-size: 1.1rem; color: #ffffff;">Dia ${day} de ${MONTH_NAMES[CURRENT_MONTH]} (${dayOfWeek})</div>
             <div style="display: flex; gap: 0.5rem; font-size: 0.78rem;">
               <span class="save-status-pill">⭐ ${progress.percentage}% Hábitos</span>
               ${focus.totalMinutes > 0 ? `<span class="save-status-pill" style="color:#fbbf24; border-color: rgba(245,158,11,0.3);">⏱️ ${HabitStorage.formatMinutes(focus.totalMinutes)} Foco</span>` : ''}
@@ -1916,6 +1936,9 @@ document.addEventListener('DOMContentLoaded', () => {
      ========================================================================== */
   function renderHeatmapMatrix() {
     const habits = HabitStorage.getHabits();
+    if (matrixSectionTitle) {
+      matrixSectionTitle.textContent = `📊 Matriz de Consistência (${TOTAL_DAYS} Dias x ${habits.length} Hábitos - ${MONTH_NAMES[CURRENT_MONTH]}/${CURRENT_YEAR})`;
+    }
     let html = '<thead><tr><th class="habit-col-header">Hábito / Tarefa</th>';
     for (let day = 1; day <= TOTAL_DAYS; day++) {
       html += `<th style="width: 32px; min-width: 32px; font-size: 0.75rem;">${day}</th>`;
@@ -1924,7 +1947,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     habits.forEach(habit => {
       const targetCount = habit.targetCount || 1;
-      const habitStats = HabitStorage.getHabitStats(habit.id, CURRENT_YEAR);
+      const habitStats = HabitStorage.getHabitStats(habit.id, CURRENT_YEAR, CURRENT_MONTH, TOTAL_DAYS);
       html += `<tr><td class="habit-col-cell" title="${habit.title}">${habit.emoji || '🎯'} ${habit.title}</td>`;
 
       for (let day = 1; day <= TOTAL_DAYS; day++) {
@@ -1956,7 +1979,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
       }
 
-      html += `<td style="font-weight: 700; color: #fbbf24;">${habitStats.completedDays}/30</td></tr>`;
+      html += `<td style="font-weight: 700; color: #fbbf24;">${habitStats.completedDays}/${TOTAL_DAYS}</td></tr>`;
     });
 
     html += '</tbody>';
@@ -1989,12 +2012,12 @@ document.addEventListener('DOMContentLoaded', () => {
      Tab 4: Render Stats & Badges
      ========================================================================== */
   function renderStatsAndBadges() {
-    const summary = HabitStorage.getSeptemberSummary(CURRENT_YEAR);
+    const summary = HabitStorage.getSeptemberSummary(CURRENT_YEAR, CURRENT_MONTH, TOTAL_DAYS);
 
     statOverallPercentage.textContent = `${summary.overallPercentage}%`;
     statMaxStreak.textContent = `${summary.maxStreak} dias`;
     statTotalFocusMonth.textContent = HabitStorage.formatMinutes(summary.totalFocusMinutesMonth);
-    statPerfectDays.textContent = `${summary.perfectDays} / 30`;
+    statPerfectDays.textContent = `${summary.perfectDays} / ${TOTAL_DAYS}`;
     statTotalChecks.textContent = `${summary.totalChecksDone}`;
 
     badgesContainer.innerHTML = '';
@@ -3853,7 +3876,7 @@ document.addEventListener('DOMContentLoaded', () => {
       selectedDay--;
       renderAllViews();
     } else {
-      showToast('Você está no primeiro dia de Outubro.', 'ℹ️');
+      showToast(`Você está no primeiro dia de ${MONTH_NAMES[CURRENT_MONTH]}.`, 'ℹ️');
     }
   });
 
@@ -3862,7 +3885,7 @@ document.addEventListener('DOMContentLoaded', () => {
       selectedDay++;
       renderAllViews();
     } else {
-      showToast('Você está no último dia de Outubro.', 'ℹ️');
+      showToast(`Você está no último dia de ${MONTH_NAMES[CURRENT_MONTH]}.`, 'ℹ️');
     }
   });
 
@@ -4219,6 +4242,84 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  /* ==========================================================================
+     Multi-Month Navigation Logic
+     ========================================================================== */
+  function populateMonthSelect() {
+    if (!headerMonthYearSelect) return;
+    headerMonthYearSelect.innerHTML = '';
+    
+    const realNow = new Date();
+    // Range from 6 months ago to 6 months in future centered around now
+    const startMonthDate = new Date(realNow.getFullYear(), realNow.getMonth() - 6, 1);
+    
+    for (let i = 0; i < 15; i++) {
+      const d = new Date(startMonthDate.getFullYear(), startMonthDate.getMonth() + i, 1);
+      const y = d.getFullYear();
+      const m = d.getMonth() + 1;
+      const isActualCurrentMonth = (y === realNow.getFullYear() && m === (realNow.getMonth() + 1));
+      const label = `${MONTH_NAMES[m]} ${y}${isActualCurrentMonth ? ' (Atual)' : ''}`;
+      
+      const opt = document.createElement('option');
+      opt.value = `${y}-${m}`;
+      opt.textContent = label;
+      if (y === CURRENT_YEAR && m === CURRENT_MONTH) {
+        opt.selected = true;
+      }
+      headerMonthYearSelect.appendChild(opt);
+    }
+  }
+
+  function changeMonth(targetYear, targetMonth) {
+    let year = targetYear;
+    let month = targetMonth;
+    if (month < 1) {
+      month = 12;
+      year--;
+    } else if (month > 12) {
+      month = 1;
+      year++;
+    }
+
+    CURRENT_YEAR = year;
+    CURRENT_MONTH = month;
+    TOTAL_DAYS = getDaysInMonth(CURRENT_YEAR, CURRENT_MONTH);
+
+    const realNow = new Date();
+    if (realNow.getFullYear() === CURRENT_YEAR && (realNow.getMonth() + 1) === CURRENT_MONTH) {
+      todayDay = realNow.getDate();
+      selectedDay = Math.min(todayDay, TOTAL_DAYS);
+    } else {
+      todayDay = null;
+      selectedDay = Math.min(selectedDay, TOTAL_DAYS);
+    }
+    viewingModalDay = selectedDay;
+
+    populateMonthSelect();
+    renderAllViews();
+    showToast(`Exibindo ${MONTH_NAMES[CURRENT_MONTH]} de ${CURRENT_YEAR}`, '📅');
+  }
+
+  if (btnPrevMonth) {
+    btnPrevMonth.addEventListener('click', () => {
+      changeMonth(CURRENT_YEAR, CURRENT_MONTH - 1);
+    });
+  }
+  if (btnNextMonth) {
+    btnNextMonth.addEventListener('click', () => {
+      changeMonth(CURRENT_YEAR, CURRENT_MONTH + 1);
+    });
+  }
+  if (headerMonthYearSelect) {
+    headerMonthYearSelect.addEventListener('change', (e) => {
+      const parts = e.target.value.split('-');
+      const y = parseInt(parts[0], 10);
+      const m = parseInt(parts[1], 10);
+      if (y && m) changeMonth(y, m);
+    });
+  }
+
   // Initial Boot
+  populateMonthSelect();
   renderAllViews();
 });

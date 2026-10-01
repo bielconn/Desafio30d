@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Desafio 30 Dias de Setembro | Habit Tracker & Calendário</title>
-  <meta name="description" content="Acompanhe seus 30 hábitos durante os 30 dias de setembro. Calendário interativo, checklist diário, matriz de calor, timer pomodoro, diário de bordo com capa de livro e alertas prioritários.">
-  <link rel="stylesheet" href="css/style.css?v=4.4">
+  <title>Desafio 31 Dias de Outubro | Habit Tracker & Calendário</title>
+  <meta name="description" content="Acompanhe seus 30 hábitos durante os 31 dias de outubro. Calendário interativo, checklist diário, matriz de calor, timer pomodoro, diário de bordo com capa de livro e alertas prioritários.">
+  <link rel="stylesheet" href="css/style.css?v=4.5">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="icon" type="image/png" sizes="64x64" href="icon-64.png">
   <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
@@ -31,7 +31,7 @@
           <div class="brand-icon">🎯</div>
           <div class="brand-info">
             <h1>Desafio 30 Dias</h1>
-            <span class="brand-badge">📅 Setembro 2026<span class="brand-badge-detail"> • 30 Hábitos, Foco & Alertas</span></span>
+            <span class="brand-badge">📅 Outubro 2026<span class="brand-badge-detail"> • 30 Hábitos, Foco & Alertas</span></span>
           </div>
         </div>
 
@@ -95,7 +95,7 @@
       <div class="hero-info-col">
         <div class="date-navigator">
           <button class="nav-arrow-btn" id="btn-prev-day" title="Dia Anterior" aria-label="Dia Anterior">◀</button>
-          <div class="current-date-badge" id="current-date-text">Dia 1 de Setembro</div>
+          <div class="current-date-badge" id="current-date-text">Dia 1 de Outubro</div>
           <button class="nav-arrow-btn" id="btn-next-day" title="Próximo Dia" aria-label="Próximo Dia">▶</button>
           <button class="btn-today" id="btn-go-today">Hoje</button>
         </div>
@@ -259,14 +259,14 @@
               <div>
                 <label class="form-label" for="alert-input-type">Quando?</label>
                 <select id="alert-input-type" class="form-select">
-                  <option value="specific_day">Dia Fixo em Setembro</option>
+                  <option value="specific_day">Dia Fixo em Outubro</option>
                   <option value="recurring_weekly">Repetir Toda Semana</option>
                 </select>
               </div>
 
               <div id="alert-day-selector-group">
-                <label class="form-label" for="alert-input-day" id="alert-day-label">Dia de Setembro (1 a 30)</label>
-                <input type="number" id="alert-input-day" class="form-input" min="1" max="30" value="1">
+                <label class="form-label" for="alert-input-day" id="alert-day-label">Dia de Outubro (1 a 31)</label>
+                <input type="number" id="alert-input-day" class="form-input" min="1" max="31" value="1">
               </div>
             </div>
 
@@ -280,7 +280,7 @@
           <!-- List of Alerts for Selected Day & Upcoming -->
           <div style="margin-top: 1.5rem;">
             <h4 style="font-size: 1rem; font-weight: 700; color: #ffffff; margin-bottom: 0.75rem;" id="alerts-day-title">
-              Alertas para o Dia 1 de Setembro
+              Alertas para o Dia 1 de Outubro
             </h4>
             <div id="daily-alerts-container" class="alerts-list">
               <!-- Injected via JavaScript -->
@@ -421,9 +421,14 @@
               <h3 style="font-size: 1.15rem; font-weight: 800; color: #ffffff;">⏱️ Registro de Foco do Dia</h3>
               <p style="font-size: 0.85rem; color: var(--text-muted);">Histórico de sessões de Pomodoro e concentração concluídas hoje.</p>
             </div>
-            <button class="btn-primary" id="btn-start-custom-pomodoro">
-              ▶ Iniciar Pomodoro Agora
-            </button>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              <button class="btn-secondary" id="btn-open-manual-focus" style="display: inline-flex; align-items: center; gap: 0.35rem;">
+                ✍️ Lançar Tempo Manual
+              </button>
+              <button class="btn-primary" id="btn-start-custom-pomodoro">
+                ▶ Iniciar Pomodoro Agora
+              </button>
+            </div>
           </div>
 
           <div id="daily-focus-sessions-list">
@@ -441,10 +446,10 @@
 
     </main>
 
-    <!-- TAB 2: Calendário 30 Dias (Com Alertas, Leitor de Diário, Capa & Foco) -->
+    <!-- TAB 2: Calendário 31 Dias (Com Alertas, Leitor de Diário, Capa & Foco) -->
     <section id="tab-calendar" class="tab-content-panel">
       <div class="calendar-view-header">
-        <h2 class="section-title">📅 Setembro de 2026 (30 Dias)</h2>
+        <h2 class="section-title">📅 Outubro de 2026 (31 Dias)</h2>
         <div class="calendar-legend">
           <div class="legend-item"><span class="legend-dot perfect"></span> 100% Completo ⭐</div>
           <div class="legend-item"><span class="legend-dot high"></span> 70% a 99%</div>
@@ -461,7 +466,7 @@
       <div style="margin-bottom: 1rem; font-size: 0.82rem; color: var(--text-muted); background: var(--bg-secondary); padding: 0.6rem 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
         <span>💡 Clique em qualquer dia para ver <strong>Alertas Prioritários</strong>, <strong>Diário Completo</strong>, <strong>Capa & Livro</strong>, <strong>Tempo de Foco</strong> e <strong>Tarefas</strong>.</span>
         <button class="btn-secondary" id="btn-open-all-journals-timeline" style="font-size: 0.78rem;">
-          📖 Linha do Tempo dos Diários (30d)
+          📖 Linha do Tempo dos Diários (31d)
         </button>
       </div>
 
@@ -481,11 +486,11 @@
       </div>
     </section>
 
-    <!-- TAB 3: Matriz de Consistência (Heatmap 30x30) -->
+    <!-- TAB 3: Matriz de Consistência (Heatmap 31x30) -->
     <section id="tab-matrix" class="tab-content-panel">
       <div class="matrix-container">
         <div class="matrix-header-info">
-          <h2 class="section-title">📊 Matriz de Consistência (30 Dias x 30 Hábitos)</h2>
+          <h2 class="section-title">📊 Matriz de Consistência (31 Dias x 30 Hábitos)</h2>
           <span style="font-size: 0.82rem; color: var(--text-muted);">
             Clique em qualquer célula para marcar ou desmarcar diretamente.
           </span>
@@ -691,51 +696,128 @@
 
   </div>
 
-  <!-- MODAL: Pomodoro Timer com Foco Contínuo & Tempo Extra -->
+  <!-- MODAL: Pomodoro Timer & Registro de Foco Manual -->
   <div class="modal-overlay" id="pomodoro-modal">
-    <div class="modal-dialog" style="max-width: 460px; text-align: center;">
+    <div class="modal-dialog" style="max-width: 480px; text-align: center;">
       <div class="modal-header">
-        <h3 class="modal-title" id="pomodoro-modal-habit-title">⏱️ Timer de Foco</h3>
+        <h3 class="modal-title" id="pomodoro-modal-habit-title">⏱️ Tempo de Foco & Produtividade</h3>
         <button class="modal-close-btn" id="btn-close-pomodoro-modal">&times;</button>
       </div>
 
-      <div class="pomodoro-display-container">
-        <div class="pomodoro-habit-name" id="pomodoro-active-habit-name">Foco Geral</div>
+      <!-- Segmented Mode Control (Timer vs Manual) -->
+      <div class="pomodoro-mode-switch">
+        <button type="button" class="pomodoro-mode-btn active" id="pomodoro-tab-timer-btn">
+          ⏱️ Timer em Tempo Real
+        </button>
+        <button type="button" class="pomodoro-mode-btn" id="pomodoro-tab-manual-btn">
+          ✍️ Registro Manual
+        </button>
+      </div>
 
-        <!-- Overtime Status Banner -->
-        <div id="pomodoro-status-badge" class="pomodoro-status-tag" style="display: none;">
-          ⭐ Meta Inicial Concluída! Foco Extra Ativo
+      <!-- VIEW 1: Realtime Pomodoro Timer -->
+      <div id="pomodoro-timer-view" class="pomodoro-view-panel">
+        <div class="pomodoro-display-container">
+          <div class="pomodoro-habit-name" id="pomodoro-active-habit-name">Foco Geral</div>
+
+          <!-- Overtime Status Banner -->
+          <div id="pomodoro-status-badge" class="pomodoro-status-tag" style="display: none;">
+            ⭐ Meta Inicial Concluída! Foco Extra Ativo
+          </div>
+
+          <div class="pomodoro-time-display" id="pomodoro-timer-digits">25:00</div>
+          
+          <div class="pomodoro-presets" id="pomodoro-presets-bar">
+            <button class="preset-btn" data-min="10">10m</button>
+            <button class="preset-btn" data-min="15">15m</button>
+            <button class="preset-btn active" data-min="25">25m</button>
+            <button class="preset-btn" data-min="30">30m</button>
+            <button class="preset-btn" data-min="50">50m (Deep)</button>
+          </div>
+
+          <div class="pomodoro-controls">
+            <button class="btn-primary" id="btn-pomodoro-toggle" style="padding: 0.75rem 1.6rem; font-size: 1.05rem;">
+              ▶ Iniciar
+            </button>
+            <button class="btn-secondary" id="btn-pomodoro-finish" title="Finalizar e registrar tempo total" style="display: none; background: rgba(16, 185, 129, 0.2); color: #34d399; border-color: rgba(16, 185, 129, 0.4);">
+              ⏹️ Concluir
+            </button>
+            <button class="btn-secondary" id="btn-pomodoro-add5" title="Adicionar 5 minutos">
+              +5 min
+            </button>
+            <button class="btn-secondary" id="btn-pomodoro-reset" title="Reiniciar">
+              ↺ Reiniciar
+            </button>
+          </div>
+
+          <div style="margin-top: 1.25rem; font-size: 0.82rem; color: var(--text-muted); display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+            <input type="checkbox" id="pomodoro-auto-check" checked style="accent-color: var(--accent-emerald);">
+            <label for="pomodoro-auto-check">Marcar hábito automaticamente ao atingir o tempo inicial</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 2: Manual Focus Entry -->
+      <div id="pomodoro-manual-view" class="pomodoro-view-panel" style="display: none; text-align: left; padding: 0.5rem 0.25rem;">
+        <div class="manual-focus-day-info" id="manual-focus-day-info">
+          📅 Registrando foco para o <strong>Dia 1 de Outubro</strong>
         </div>
 
-        <div class="pomodoro-time-display" id="pomodoro-timer-digits">25:00</div>
-        
-        <div class="pomodoro-presets" id="pomodoro-presets-bar">
-          <button class="preset-btn" data-min="10">10m</button>
-          <button class="preset-btn" data-min="15">15m</button>
-          <button class="preset-btn active" data-min="25">25m</button>
-          <button class="preset-btn" data-min="30">30m</button>
-          <button class="preset-btn" data-min="50">50m (Deep)</button>
+        <div class="form-group">
+          <label class="form-label" for="manual-focus-habit-select">🎯 Atividade ou Hábito do Desafio</label>
+          <select id="manual-focus-habit-select" class="form-select">
+            <!-- Injected via JavaScript with habits + 'Outra atividade' -->
+          </select>
         </div>
 
-        <div class="pomodoro-controls">
-          <button class="btn-primary" id="btn-pomodoro-toggle" style="padding: 0.75rem 1.6rem; font-size: 1.05rem;">
-            ▶ Iniciar
-          </button>
-          <button class="btn-secondary" id="btn-pomodoro-finish" title="Finalizar e registrar tempo total" style="display: none; background: rgba(16, 185, 129, 0.2); color: #34d399; border-color: rgba(16, 185, 129, 0.4);">
-            ⏹️ Concluir
-          </button>
-          <button class="btn-secondary" id="btn-pomodoro-add5" title="Adicionar 5 minutos">
-            +5 min
-          </button>
-          <button class="btn-secondary" id="btn-pomodoro-reset" title="Reiniciar">
-            ↺ Reiniciar
-          </button>
+        <div class="form-group" id="manual-focus-custom-title-group" style="display: none;">
+          <label class="form-label" for="manual-focus-custom-title">Nome da Atividade / Foco Livre</label>
+          <input type="text" id="manual-focus-custom-title" class="form-input" placeholder="Ex: Minerar ofertas, Editar vídeo, Estudo de copy...">
         </div>
 
-        <div style="margin-top: 1.25rem; font-size: 0.82rem; color: var(--text-muted); display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
-          <input type="checkbox" id="pomodoro-auto-check" checked style="accent-color: var(--accent-emerald);">
-          <label for="pomodoro-auto-check">Marcar hábito automaticamente ao atingir o tempo inicial</label>
+        <div class="form-group" style="margin-bottom: 0.5rem;">
+          <label class="form-label">⏱️ Quanto tempo você se dedicou?</label>
+          <div class="manual-presets-bar" id="manual-presets-bar">
+            <button type="button" class="manual-preset-btn" data-mins="15">15 min</button>
+            <button type="button" class="manual-preset-btn active" data-mins="25">25 min</button>
+            <button type="button" class="manual-preset-btn" data-mins="30">30 min</button>
+            <button type="button" class="manual-preset-btn" data-mins="45">45 min</button>
+            <button type="button" class="manual-preset-btn" data-mins="60">1h</button>
+            <button type="button" class="manual-preset-btn" data-mins="90">1h 30m</button>
+            <button type="button" class="manual-preset-btn" data-mins="120">2h</button>
+          </div>
         </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 0.5rem;">
+          <div>
+            <label class="form-label" for="manual-focus-hours" style="font-size: 0.78rem;">Horas</label>
+            <input type="number" id="manual-focus-hours" class="form-input" min="0" max="24" value="0">
+          </div>
+          <div>
+            <label class="form-label" for="manual-focus-minutes" style="font-size: 0.78rem;">Minutos</label>
+            <input type="number" id="manual-focus-minutes" class="form-input" min="0" max="59" value="25">
+          </div>
+        </div>
+
+        <div id="manual-focus-total-badge" style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; padding: 0.4rem 0.65rem; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: var(--radius-sm); font-size: 0.8rem;">
+          <span style="color: var(--text-muted);">Tempo total selecionado:</span>
+          <span id="manual-focus-total-text" style="font-weight: 800; color: var(--accent-emerald-light); font-family: 'Fira Code', monospace;">25m</span>
+        </div>
+
+        <div style="margin-top: 0.9rem;" id="manual-focus-autocheck-wrapper">
+          <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.84rem; color: var(--text-main); cursor: pointer;">
+            <input type="checkbox" id="manual-focus-auto-check" checked style="accent-color: var(--accent-emerald); width: 16px; height: 16px;">
+            <span id="manual-focus-autocheck-label">Marcar hábito como concluído hoje</span>
+          </label>
+        </div>
+
+        <div class="form-group" style="margin-top: 0.85rem; margin-bottom: 1.25rem;">
+          <label class="form-label" for="manual-focus-notes" style="font-size: 0.78rem;">📝 O que você fez? (Opcional)</label>
+          <input type="text" id="manual-focus-notes" class="form-input" placeholder="Ex: Li 15 páginas, finalizei a estrutura do projeto...">
+        </div>
+
+        <button type="button" class="btn-primary" id="btn-save-manual-focus" style="width: 100%; justify-content: center; font-size: 1rem; padding: 0.75rem;">
+          💾 Salvar Tempo Dedicado
+        </button>
       </div>
     </div>
   </div>
@@ -745,7 +827,7 @@
     <div class="modal-dialog" style="max-width: 580px;">
       <div class="modal-header">
         <div>
-          <h3 class="modal-title" id="day-view-title">Dia 1 de Setembro</h3>
+          <h3 class="modal-title" id="day-view-title">Dia 1 de Outubro</h3>
           <span id="day-view-badge" class="brand-badge">Resumo do Dia</span>
         </div>
         <button class="modal-close-btn" id="btn-close-day-view-modal">&times;</button>
@@ -771,7 +853,7 @@
   <div class="modal-overlay" id="timeline-modal">
     <div class="modal-dialog" style="max-width: 680px; max-height: 85vh; display: flex; flex-direction: column;">
       <div class="modal-header">
-        <h3 class="modal-title">📖 Linha do Tempo dos Diários (Setembro 2026)</h3>
+        <h3 class="modal-title">📖 Linha do Tempo dos Diários (Outubro 2026)</h3>
         <button class="modal-close-btn" id="btn-close-timeline-modal">&times;</button>
       </div>
 
@@ -1245,9 +1327,9 @@
   <div class="toast-container" id="toast-container"></div>
 
   <!-- Scripts -->
-  <script src="js/workouts-data.js?v=4.4"></script>
-  <script src="js/confetti.js?v=4.4"></script>
-  <script src="js/storage.js?v=4.4"></script>
-  <script src="js/app.js?v=4.4"></script>
+  <script src="js/workouts-data.js?v=4.5"></script>
+  <script src="js/confetti.js?v=4.5"></script>
+  <script src="js/storage.js?v=4.5"></script>
+  <script src="js/app.js?v=4.5"></script>
 </body>
 </html>

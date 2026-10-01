@@ -158,6 +158,53 @@ body {
   border: 1px solid rgba(16, 185, 129, 0.25);
 }
 
+.month-selector-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: var(--radius-full);
+  padding: 0.12rem 0.4rem;
+  margin-top: 0.15rem;
+}
+
+.btn-month-nav {
+  background: transparent;
+  border: none;
+  color: var(--accent-emerald-light);
+  font-size: 0.72rem;
+  cursor: pointer;
+  padding: 0.1rem 0.35rem;
+  border-radius: 50%;
+  transition: var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-month-nav:hover {
+  background: rgba(16, 185, 129, 0.25);
+  color: #ffffff;
+}
+
+.month-year-select {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 0.05rem 0.2rem;
+  outline: none;
+  font-family: inherit;
+}
+
+.month-year-select option {
+  background: #181b22;
+  color: #ffffff;
+}
+
 .header-actions {
   display: flex;
   align-items: center;
